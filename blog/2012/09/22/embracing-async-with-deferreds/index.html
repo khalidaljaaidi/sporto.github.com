@@ -1,34 +1,119 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Sebastian's Blog]]></title>
-  <link href="http://sporto.github.com/atom.xml" rel="self"/>
-  <link href="http://sporto.github.com/"/>
-  <updated>2012-09-22T22:48:53+10:00</updated>
-  <id>http://sporto.github.com/</id>
-  <author>
-    <name><![CDATA[Sebastian Porto]]></name>
-    
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Embracing Async with Deferreds and Promises - Sebastian's Blog</title>
+  <meta name="author" content="Sebastian Porto">
 
   
-  <entry>
-    <title type="html"><![CDATA[Embracing Async with Deferreds and Promises]]></title>
-    <link href="http://sporto.github.com/blog/2012/09/22/embracing-async-with-deferreds/"/>
-    <updated>2012-09-22T00:00:00+10:00</updated>
-    <id>http://sporto.github.com/blog/2012/09/22/embracing-async-with-deferreds</id>
-    <content type="html"><![CDATA[<p>Deferred and promises are a very powerful tool for handling asynchronous events. In this blog post I will explain what they are and when to use them.</p>
+  <meta name="description" content="Deferred and promises are a very powerful tool for handling asynchronous events. In this blog post I will explain what they are and when to use them &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://sporto.github.com/blog/2012/09/22/embracing-async-with-deferreds/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Sebastian's Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=Lato:100,300,400" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-34169292-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+	
+    <h2>Mostly about Javascript, Ruby on Rails and other web stuff</h2>
+  
+  <h1><a href="/">Sebastian's Blog</a></h1>
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:sporto.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Embracing Async With Deferreds and Promises</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-22T00:00:00+10:00" pubdate data-updated="true">Sep 22<span>nd</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Deferred and promises are a very powerful tool for handling asynchronous events. In this blog post I will explain what they are and when to use them.</p>
 
 <h2>Let&#8217;s create gretting cards</h2>
 
 <p>As an example let’s say that we are building a UI for a greeting cards making application. Our UI may look something like this:</p>
 
-<p><img src="http://sporto.github.com/images/deferreds/image01.png"></p>
+<p><img src="/images/deferreds/image01.png"></p>
 
 <p>The user can select an animation, select the music and then click next. Our event flow will look like this:</p>
 
-<p><img src="http://sporto.github.com/images/deferreds/image02.png"></p>
+<p><img src="/images/deferreds/image02.png"></p>
 
 <p>In this first case we know everything we need from the beginning. When the user clicks &#8216;next&#8217; we know which animation and which music to load. After we are done loading these assets we will show the greeting card. To do this is code we have several options:</p>
 
@@ -76,17 +161,17 @@
 
 <p>Now let’s imagine that we don’t want a ‘Next’ button anymore in our UI:</p>
 
-<p><img src="http://sporto.github.com/images/deferreds/image04.png"></p>
+<p><img src="/images/deferreds/image04.png"></p>
 
 <p>Here we just want to show the greeting card automatically after the user has selected the animation and the music. Maybe not the best user experience but it works for our example. We don&#8217;t know the order in which the user will select the assets.</p>
 
 <p>If we want to stick with the previous way of doing thing (knowing everything at the start). Our event flow will looks something like this:</p>
 
-<p><img src="http://sporto.github.com/images/deferreds/image05.png"></p>
+<p><img src="/images/deferreds/image05.png"></p>
 
 <p>In the above flow we are waiting idle while the user is busy selecting the music. We don&#8217;t want this, we want to take advantage of this time to load the assets the user has already chosen. So our event flow should look more like this:</p>
 
-<p><img src="http://sporto.github.com/images/deferreds/image06.png"></p>
+<p><img src="/images/deferreds/image06.png"></p>
 
 <p>In this flow we start loading the animation as soon as the user has selected it. While the user is busy selecting the music the animation is loading in the background. As soon as the user select the music we start loading it too in paralell.</p>
 
@@ -199,7 +284,7 @@
 
 <p>So going back to our greeting cards example. To do this:</p>
 
-<p><img src="http://sporto.github.com/images/deferreds/image06.png"></p>
+<p><img src="/images/deferreds/image06.png"></p>
 
 <p>We can simply code it like this:</p>
 
@@ -236,7 +321,7 @@
 
 <p>Deferreds have another neat trick. Let&#8217;s say that the user selects the music first and it completely loads before we even start loading the animation.</p>
 
-<p><img src="http://sporto.github.com/images/deferreds/image07.png"></p>
+<p><img src="/images/deferreds/image07.png"></p>
 
 <p>By the time we add our aggregated listener the Deferred for the music has already been resolved:</p>
 
@@ -380,7 +465,7 @@
 
 <p>Using Deferreds you can easily code something like this. Where you have many actions happening at the same time, each without a clear start and ending and depending on each other.</p>
 
-<p><img src="http://sporto.github.com/images/deferreds/image08.png"></p>
+<p><img src="/images/deferreds/image08.png"></p>
 
 <h2>Conclusion</h2>
 
@@ -392,68 +477,154 @@
 <li>You have other actions that depend on the completion of multiple other actions</li>
 </ul>
 
-]]></content>
-  </entry>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
   
-  <entry>
-    <title type="html"><![CDATA[My experience with Backbone, Ember and CanJS]]></title>
-    <link href="http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/"/>
-    <updated>2012-08-18T00:00:00+10:00</updated>
-    <id>http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs</id>
-    <content type="html"><![CDATA[<p>Before coming to the JavaScript world I was doing Flex development, so I was quite familiar with MVC paradigm in the front-end side of applications.</p>
 
-<p>When I first started using JavaScript I learnt to do things in the usual way of that time - which is having the DOM as the source of truth. e.g. We will add elements to the DOM and if we wanted to know the length of a collection we will just use jQuery to ask the DOM for how many elements there were.</p>
+<span class="byline author vcard">Posted by <span class="fn">Sebastian Porto</span></span>
 
-<p>I soon grew tired of this way of doing things, it was just messy.</p>
-
-<h2>Backbone</h2>
-
-<p><a href="http://backbonejs.org/">Backbone</a> captured a lot of attention when it came up, it was the first MVC framework that looked easy to get into. So I decided to try it. It was a great start, the structure of my code started to resemble a lot more what I was used to in Flex e.g. collections, views, controllers.</p>
-
-<p>But there were many times where I would think &#8220;What? Do I need to do this myself? Shouldn&#8217;t Backbone take care of this?&#8221;. For example when a collection changed the view needed to know and I had to hook all these events myself.</p>
-
-<p>Another thing that was a let down is that there is no build-in way of doing live binding in the views. You have to do this yourself e.g. re-render a view manually when something changes (via events). Also doing nested views was more complex that it needed to be.</p>
-
-<p>Backbone just left me wanting a lot more from an MVC framework. So I decided that Backbone was not my cup of tea, it wasn&#8217;t really doing enough useful things for me.</p>
-
-<h2>Ember</h2>
-
-<p><a href="http://emberjs.com/">Ember</a> also came up with quite a hype and it looked like the perfect fit for everything I was expecting. It has live binding, a great object model and an excellent template engine.</p>
-
-<p>It takes a while to learn as it deviates quite a bit from the usual way of doing JavaScript, Ember relies heavily on binding instead of events. I got a lot into it, even did a talk about it in my local user group.</p>
-
-<p>I liked it but I wasn&#8217;t completely happy with it because:</p>
-
-<ul>
-<li>It is huge, totally overkill for small projects or mobile apps.</li>
-<li>Performance wise it is not that good either, quite slow compared to Backbone. <a href="http://jsfiddle.net/jashkenas/CGSd5/">http://jsfiddle.net/jashkenas/CGSd5/</a></li>
-<li>It is hard to debug, when something fails it gives you very obscure error messages that are hard to track back to the source.</li>
-<li>It adds scripts tags around elements, which breaks CSS styling in some cases.</li>
-<li>It required me to declare lots of small components, so for simple things I ended up with too many objects.</li>
-<li>It also force me to declare objects in the global space, I couldn&#8217;t find a way of not having to do this.</li>
-</ul>
+      
 
 
-<h2>CanJS</h2>
-
-<p>Then came <a href="http://canjs.us/">CanJS</a> (without the hype of the other two), it is a reboot of the venerable JavascriptMVC project. Bitovi has done a great job at making JavascriptMVC a lot more accessible to newcomers.</p>
-
-<p>CanJS looked intriguing, so I decided to use it in my next project. It was a great success for me. It stroked a great balance between Backbone and Ember. The features I like a lot in CanJS are:</p>
-
-<ul>
-<li>It is quite small, just a bit bigger than Backbone. Tiny compared to Ember.</li>
-<li>It is fast (as fast as Backbone). <a href="http://jsfiddle.net/sporto/Ek9am/">http://jsfiddle.net/sporto/Ek9am/</a></li>
-<li>It has live binding out of the box, and they work perfectly well (although I prefer handlebars, I can live with EJS).</li>
-<li>It is a lot more general purpose than Backbone and Ember. For example CanJS has an observable object that can be used in a huge variety of situations, not just when doing MVC.</li>
-</ul>
 
 
-<p>CanJS has become my MVC library of choice. I really recommend you give it a go in your next project.</p>
 
-<h2>The future</h2>
 
-<p>I am planning to keep using CanJS in the future, but <a href="http://www.angularjs.org/">Angular</a> looks very appealing, I really like the declarative way of doing things directly in html without having to use templates. I am planning to give Angular a go soon.</p>
-]]></content>
-  </entry>
+
+
   
-</feed>
+
+
+<time datetime="2012-09-22T00:00:00+10:00" pubdate data-updated="true">Sep 22<span>nd</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://sporto.github.com/blog/2012/09/22/embracing-async-with-deferreds/" data-via="sebasporto" data-counturl="http://sporto.github.com/blog/2012/09/22/embracing-async-with-deferreds/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/08/18/backbone-ember-canjs/" title="Previous Post: My experience with Backbone, Ember and CanJS">&laquo; My experience with Backbone, Ember and CanJS</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/09/22/embracing-async-with-deferreds/">Embracing Async with Deferreds and Promises</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/08/18/backbone-ember-canjs/">My experience with Backbone, Ember and CanJS</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("sebasporto", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/sebasporto" class="twitter-follow-button" data-show-count="false">Follow @sebasporto</a>
+  
+</section>
+
+
+<section>
+  <h1>On Delicious</h1>
+  <div id="delicious"></div>
+  <script type="text/javascript" src="http://feeds.delicious.com/v2/json/sebasporto?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+  <p><a href="http://delicious.com/sebasporto">My Delicious Bookmarks &raquo;</a></p>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Sebastian Porto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'sportoblog';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://sporto.github.com/blog/2012/09/22/embracing-async-with-deferreds/';
+        var disqus_url = 'http://sporto.github.com/blog/2012/09/22/embracing-async-with-deferreds/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
