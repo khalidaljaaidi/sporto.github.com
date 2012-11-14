@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>My experience with Backbone, Ember and CanJS - Sebastian's Blog</title>
+  <title>State Machines are Awesome - Sebastian's Blog</title>
   <meta name="author" content="Sebastian Porto">
 
   
-  <meta name="description" content="Before coming to the JavaScript world I was doing Flex development, so I was quite familiar with MVC paradigm in the front-end side of applications. &hellip;">
+  <meta name="description" content="Being mostly a self taught developer, nobody ever taught me what a state machine was. When I finally stumbled upon them I realised I have been &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/">
+  <link rel="canonical" href="http://sporto.github.com/blog/2011/05/05/state-machines-are-awesome/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -80,7 +80,7 @@
   
   <header>
     
-      <h1 class="entry-title">My Experience With Backbone, Ember and CanJS</h1>
+      <h1 class="entry-title">State Machines Are Awesome</h1>
     
     
       <p class="meta">
@@ -96,66 +96,90 @@
   
 
 
-<time datetime="2012-08-18T00:00:00+10:00" pubdate data-updated="true">Aug 18<span>th</span>, 2012</time>
+<time datetime="2011-05-05T00:00:00+10:00" pubdate data-updated="true">May 5<span>th</span>, 2011</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>Before coming to the JavaScript world I was doing Flex development, so I was quite familiar with MVC paradigm in the front-end side of applications.</p>
+<div class="entry-content"><p>Being mostly a self taught developer, nobody ever taught me what a state machine was. When I finally stumbled upon them I realised I have been missing out by not using them before.</p>
 
-<p>When I first started using JavaScript I learnt to do things in the usual way of that time - which is having the DOM as the source of truth. e.g. We will add elements to the DOM and if we wanted to know the length of a collection we will just use jQuery to ask the DOM for how many elements there were.</p>
+<p>When I first started learning about them I couldn&#8217;t find a good explanation in plain english. So here is my attempt to explain state machines in a simple way and why you should use them.</p>
 
-<p>I soon grew tired of this way of doing things, it was just messy.</p>
+<p>The code examples below are in Ruby using the <a href="https://github.com/pluginaweek/state_machine">state_machine</a> gem. But this are general concepts for any language.</p>
 
-<h2>Backbone</h2>
+<h2>What is a state machine?</h2>
 
-<p><a href="http://backbonejs.org/">Backbone</a> captured a lot of attention when it came up, it was the first MVC framework that looked easy to get into. So I decided to try it. It was a great start, the structure of my code started to resemble a lot more what I was used to in Flex e.g. collections, views, controllers.</p>
+<p>In essence a state machine tracks the state of an object and describes the actions that this object can perform at any given time.</p>
 
-<p>But there were many times where I would think &#8220;What? Do I need to do this myself? Shouldn&#8217;t Backbone take care of this?&#8221;. For example when a collection changed the view needed to know and I had to hook all these events myself.</p>
+<p>A state machine has several components: states, events and transitions.</p>
 
-<p>Another thing that was a let down is that there is no build-in way of doing live binding in the views. You have to do this yourself e.g. re-render a view manually when something changes (via events). Also doing nested views was more complex that it needed to be.</p>
+<h2>States</h2>
 
-<p>Backbone just left me wanting a lot more from an MVC framework. So I decided that Backbone was not my cup of tea, it wasn&#8217;t really doing enough useful things for me.</p>
-
-<h2>Ember</h2>
-
-<p><a href="http://emberjs.com/">Ember</a> also came up with quite a hype and it looked like the perfect fit for everything I was expecting. It has live binding, a great object model and an excellent template engine.</p>
-
-<p>It takes a while to learn as it deviates quite a bit from the usual way of doing JavaScript, Ember relies heavily on binding instead of events. I got a lot into it, even did a talk about it in my local user group.</p>
-
-<p>I liked it but I wasn&#8217;t completely happy with it because:</p>
+<p>Let&#8217;s say we have an &#8216;order&#8217; object. We could use a state machine to track the state of our order. The order could have the following states:</p>
 
 <ul>
-<li>It is huge, totally overkill for small projects or mobile apps.</li>
-<li>Performance wise it is not that good either, quite slow compared to Backbone. <a href="http://jsfiddle.net/jashkenas/CGSd5/">http://jsfiddle.net/jashkenas/CGSd5/</a></li>
-<li>It is hard to debug, when something fails it gives you very obscure error messages that are hard to track back to the source.</li>
-<li>It adds scripts tags around elements, which breaks CSS styling in some cases.</li>
-<li>It required me to declare lots of small components, so for simple things I ended up with too many objects.</li>
-<li>It also force me to declare objects in the global space, I couldn&#8217;t find a way of not having to do this.</li>
+<li>Open</li>
+<li>Placed</li>
+<li>Held</li>
+<li>Cancelled</li>
+<li>Shipped</li>
+<li>Returned</li>
 </ul>
 
 
-<h2>CanJS</h2>
+<p>The subject of the state machine can be in only one state at any given  time. The order can either be &#8216;Held&#8217; or &#8216;Shipped&#8217;. These are the states. And we can have only one.</p>
 
-<p>Then came <a href="http://canjs.us/">CanJS</a> (without the hype of the other two), it is a reboot of the venerable JavascriptMVC project. Bitovi has done a great job at making JavascriptMVC a lot more accessible to newcomers.</p>
+<p>If we want to have two states at the same time we would need to have two state machine running in parallel.</p>
 
-<p>CanJS looked intriguing, so I decided to use it in my next project. It was a great success for me. It stroked a great balance between Backbone and Ember. The features I like a lot in CanJS are:</p>
+<h2>Events</h2>
+
+<p>We can define events that our state machine can perform. For example:</p>
 
 <ul>
-<li>It is quite small, just a bit bigger than Backbone. Tiny compared to Ember.</li>
-<li>It is fast (as fast as Backbone). <a href="http://jsfiddle.net/sporto/Ek9am/">http://jsfiddle.net/sporto/Ek9am/</a></li>
-<li>It has live binding out of the box, and they work perfectly well (although I prefer handlebars, I can live with EJS).</li>
-<li>It is a lot more general purpose than Backbone and Ember. For example CanJS has an observable object that can be used in a huge variety of situations, not just when doing MVC.</li>
+<li>Create</li>
+<li>Cancel</li>
+<li>Hold</li>
+<li>Ship</li>
+<li>Return</li>
 </ul>
 
 
-<p>CanJS has become my MVC library of choice. I really recommend you give it a go in your next project.</p>
+<p>Not all events can be called at any time, the available events are dependant on the current state of the object.  A state machine manages this logic for us.</p>
 
-<h2>The future</h2>
+<p>In Ruby (using state_machine) we could do something like this:</p>
 
-<p>I am planning to keep using CanJS in the future, but <a href="http://www.angularjs.org/">Angular</a> looks very appealing, I really like the declarative way of doing things directly in html without having to use templates. I am planning to give Angular a go soon.</p>
+<pre><code>order.can_cancel? #ask if the order can be cancelled at this time
+order.cancel #send the cancel event to the order
+</code></pre>
+
+<p>The following diagram shows the state machine flow.</p>
+
+<p><img src="https://docs.google.com/drawings/pub?id=178_CnXn19xnNumvnBY8BxIsJQ245rdoyzvUOwN-MQqM&amp;w=528&amp;h=413"></p>
+
+<p>So as you can see in the diagram there are predetermined paths that the state machine can follow. It can move from the &#8216;Created&#8217; state to the &#8216;Placed&#8217; state but not to the &#8216;Shipped&#8217; state.</p>
+
+<p>The state machine will complain if you try to call an event that is not permitted depending on the current state.</p>
+
+<h2>Transitions</h2>
+
+<p>Finally, when an event is called it may trigger a transition. For example the &#8216;cancel&#8217; event could trigger the following transitions:</p>
+
+<ul>
+<li>&#8216;placed&#8217; to &#8216;cancelled&#8217;</li>
+<li>&#8216;held&#8217; to &#8216;cancelled&#8217;</li>
+<li>&#8216;any&#8217; to &#8216;cancelled&#8217;</li>
+</ul>
+
+
+<p>Transitions are useful for triggering processes that should occur in particular cases. For example sending an email when the state of an order changes from &#8216;placed&#8217; to &#8216;cancelled&#8217;.</p>
+
+<h2>So why you should use state machines?</h2>
+
+<p>If it is not clear already the main reason to user them is because a state machine can manage all the complexity of knowing what events and states are available at any given time.</p>
+
+<p>So, that&#8217;s my understanding of state machines so far. I am sure I am missing out some stuff but I believe that the basics are here.</p>
 </div>
 
 
@@ -178,7 +202,7 @@
   
 
 
-<time datetime="2012-08-18T00:00:00+10:00" pubdate data-updated="true">Aug 18<span>th</span>, 2012</time>
+<time datetime="2011-05-05T00:00:00+10:00" pubdate data-updated="true">May 5<span>th</span>, 2011</time>
       
 
 
@@ -186,7 +210,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/" data-via="sebasporto" data-counturl="http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://sporto.github.com/blog/2011/05/05/state-machines-are-awesome/" data-via="sebasporto" data-counturl="http://sporto.github.com/blog/2011/05/05/state-machines-are-awesome/" >Tweet</a>
   
   
   
@@ -195,10 +219,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2011/05/05/state-machines-are-awesome/" title="Previous Post: State Machines are Awesome">&laquo; State Machines are Awesome</a>
+        <a class="basic-alignment left" href="/blog/2011/02/12/the-intuitive-proto-object/" title="Previous Post: The Intuitive Proto Object in JavaScript">&laquo; The Intuitive Proto Object in JavaScript</a>
       
       
-        <a class="basic-alignment right" href="/blog/2012/09/22/embracing-async-with-deferreds/" title="Next Post: Embracing Async with Deferreds and Promises">Embracing Async with Deferreds and Promises &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2012/08/18/backbone-ember-canjs/" title="Next Post: My experience with Backbone, Ember and CanJS">My experience with Backbone, Ember and CanJS &raquo;</a>
       
     </p>
   </footer>
@@ -288,8 +312,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/';
-        var disqus_url = 'http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/';
+        var disqus_identifier = 'http://sporto.github.com/blog/2011/05/05/state-machines-are-awesome/';
+        var disqus_url = 'http://sporto.github.com/blog/2011/05/05/state-machines-are-awesome/';
         var disqus_script = 'embed.js';
       
     (function () {
