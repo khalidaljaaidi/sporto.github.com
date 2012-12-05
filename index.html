@@ -9,7 +9,7 @@
   <meta name="author" content="Sebastian Porto">
 
   
-  <meta name="description" content="Service Objects in Rails allows to neatly separate the business logic of your application in reausable components. This post describes our &hellip;">
+  <meta name="description" content="I am starting to see a pattern in many JS libraries where they are trying to detect the presence of AMD an act accordingly. I think it is great that &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -83,7 +83,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/11/15/a-pattern-for-service-objects-in-rails/">A Pattern for Service Objects in Rails</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/12/05/amd/">AMD, Is Not One or the Other</a></h1>
     
     
       <p class="meta">
@@ -99,34 +99,35 @@
   
 
 
-<time datetime="2012-11-15T00:00:00+11:00" pubdate data-updated="true">Nov 15<span>th</span>, 2012</time>
+<time datetime="2012-12-05T12:43:00+11:00" pubdate data-updated="true">Dec 5<span>th</span>, 2012</time>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>Service Objects in Rails allows to neatly separate the business logic of your application in reausable components. This post describes our implementation of this pattern.</p>
+  <div class="entry-content"><p>I am starting to see a pattern in many JS libraries where they are trying to detect the presence of AMD an act accordingly. I think it is great that AMD is getting so much attention but they usual way this is done has a big issue: <strong>It shouldn’t be one or the other.</strong></p>
 
-<p>We went through the usual story, we started by putting some business logic in controllers and some in models, then decided that all this logic should go in the models and ended up with very fat models tightly coupled to each other.</p>
+<p>The pattern usually goes like this:</p>
 
-<p>So when looking for alternatives patterns for organising the business logic I came across the idea of having separated objects to handle this business logic. Somewhere I saw this pattern labeled as &#8216;Service objects&#8217; (SO). This was way before this very interesting post <a href="http://blog.codeclimate.com/blog/2012/10/17/7-ways-to-decompose-fat-activerecord-models/">7 Patterns to Refactor Fat ActiveRecord Models</a></p>
-
-<p>The discussions often involved the Single Responsibility Principle (SLP), so most of the examples shown a class with only one public method on it. At first I totally dismissed this as a kind of functional pattern that didn&#8217;t fit into the OOP world of Ruby.</p>
-
-<p>But my pain with the fat models made me look into this again. So I decided to give it a try. Since then I have grown very fond of this approach because of the following:</p>
-
-<ul>
-<li>As this objects have little code they are easy to reason about</li>
-<li>They are very easy to compose (use one inside the other)</li>
-<li>They encapsulate the business logic neatly, so you never has to repeat the same logic in different places</li>
-<li>They use dependency injection (DI) heavily so they are loosely couple with the rest of the application</li>
-<li>Using DI makes it very easy to swap the dependencies in testing</li>
-<li>But still they have sensible dependency defaults, I don&#8217;t see the point in injecting dependencies all the time when in 90% of the cases you just need the defaults</li>
-</ul>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>   <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="err">…</span> <span class="nx">define</span> <span class="nx">as</span> <span class="nx">AMD</span> <span class="nx">module</span>
+</span><span class='line'>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>      <span class="err">…</span> <span class="nx">attach</span> <span class="nx">as</span> <span class="nx">global</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>Let me show the pattern we are using:</p>
+<p>Problem with this is that if the script is loaded using a common script tag and a AMD loaded (e.g. require) is also present, then it won’t be possible to use the library in the normal way (using the global variable).</p>
+
+<p>You might think that if require is there we should load everything using it, but we have good reasons not to do this. We concatentate and minifiy the most important parts of our JS code, the rest is loaded using require on demand.</p>
+
+<p>So the better way to do this is by attaching the library in many ways as possible:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -147,48 +148,27 @@
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">FindInvoicesForClientService</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>   <span class="c1">// CommonJS module is defined</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">exports</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">module</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">foo</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">{})</span>
-</span><span class='line'>      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'>      <span class="n">invoices</span> <span class="o">=</span> <span class="n">find_invoices_service</span><span class="o">.</span><span class="p">(</span><span class="n">some_args</span><span class="p">)</span>
-</span><span class='line'>      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>    <span class="nx">exports</span><span class="p">.</span><span class="nx">foo</span> <span class="o">=</span> <span class="nx">foo</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">find_invoices_service</span>
-</span><span class='line'>      <span class="vi">@find_invoices_service</span> <span class="o">||=</span> <span class="no">FindInvoicesService</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="c1">// Register as a named module with AMD.</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">define</span><span class="p">(</span><span class="err">‘</span><span class="nx">foo</span><span class="err">’</span><span class="p">,</span> <span class="p">[],</span> <span class="kd">function</span><span class="p">(){</span> <span class="k">return</span> <span class="nx">foo</span><span class="p">;</span> <span class="p">});</span>
+</span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">find_invoices_service</span><span class="o">=</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-</span><span class='line'>      <span class="vi">@find_invoices_service</span> <span class="o">=</span> <span class="n">obj</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">service</span> <span class="o">=</span> <span class="no">FindInvoicesForClientService</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">service</span><span class="o">.</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># in test we just swap the dependencies</span>
-</span><span class='line'><span class="n">collaborator</span> <span class="o">=</span> <span class="n">double</span><span class="o">.</span><span class="n">as_null_object</span>
-</span><span class='line'><span class="n">collaborator</span><span class="o">.</span><span class="n">stub</span><span class="p">(</span><span class="ss">:call</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">invoices</span><span class="p">)</span>
-</span><span class='line'><span class="n">service</span><span class="o">.</span><span class="n">find_invoices_service</span> <span class="o">=</span> <span class="n">collaborator</span>
+</span><span class='line'>  <span class="c1">// Integrate with $ if defined</span>
+</span><span class='line'>  <span class="c1">// or create our own underscore object.</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">foo</span> <span class="o">=</span> <span class="nx">foo</span>
+</span><span class='line'>  <span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-<p>The key points in our version are:</p>
-
-<ul>
-<li>the class has only one public method (call)</li>
-<li>dependencies are only passed if needed, the class has some sensible defaults that will be used 90% of the time</li>
-<li>each dependency injector has its own method instead of a attr_accessor, this is so you can prepare the dependencies if needed</li>
-</ul>
-
-
-<p>This has been a great pattern for us, we have hundreds of these objects that can be easily composed as needed. This pattern has made our code seriously easier to work with.</p>
 </div>
   
   
@@ -693,376 +673,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/05/05/state-machines-are-awesome/">State Machines Are Awesome</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-05-05T00:00:00+10:00" pubdate data-updated="true">May 5<span>th</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Being mostly a self taught developer, nobody ever taught me what a state machine was. When I finally stumbled upon them I realised I have been missing out by not using them before.</p>
-
-<p>When I first started learning about them I couldn&#8217;t find a good explanation in plain english. So here is my attempt to explain state machines in a simple way and why you should use them.</p>
-
-<p>The code examples below are in Ruby using the <a href="https://github.com/pluginaweek/state_machine">state_machine</a> gem. But this are general concepts for any language.</p>
-
-<h2>What is a state machine?</h2>
-
-<p>In essence a state machine tracks the state of an object and describes the actions that this object can perform at any given time.</p>
-
-<p>A state machine has several components: states, events and transitions.</p>
-
-<h2>States</h2>
-
-<p>Let&#8217;s say we have an &#8216;order&#8217; object. We could use a state machine to track the state of our order. The order could have the following states:</p>
-
-<ul>
-<li>Open</li>
-<li>Placed</li>
-<li>Held</li>
-<li>Cancelled</li>
-<li>Shipped</li>
-<li>Returned</li>
-</ul>
-
-
-<p>The subject of the state machine can be in only one state at any given  time. The order can either be &#8216;Held&#8217; or &#8216;Shipped&#8217;. These are the states. And we can have only one.</p>
-
-<p>If we want to have two states at the same time we would need to have two state machine running in parallel.</p>
-
-<h2>Events</h2>
-
-<p>We can define events that our state machine can perform. For example:</p>
-
-<ul>
-<li>Create</li>
-<li>Cancel</li>
-<li>Hold</li>
-<li>Ship</li>
-<li>Return</li>
-</ul>
-
-
-<p>Not all events can be called at any time, the available events are dependant on the current state of the object.  A state machine manages this logic for us.</p>
-
-<p>In Ruby (using state_machine) we could do something like this:</p>
-
-<pre><code>order.can_cancel? #ask if the order can be cancelled at this time
-order.cancel #send the cancel event to the order
-</code></pre>
-
-<p>The following diagram shows the state machine flow.</p>
-
-<p><img src="https://docs.google.com/drawings/pub?id=178_CnXn19xnNumvnBY8BxIsJQ245rdoyzvUOwN-MQqM&amp;w=528&amp;h=413"></p>
-
-<p>So as you can see in the diagram there are predetermined paths that the state machine can follow. It can move from the &#8216;Created&#8217; state to the &#8216;Placed&#8217; state but not to the &#8216;Shipped&#8217; state.</p>
-
-<p>The state machine will complain if you try to call an event that is not permitted depending on the current state.</p>
-
-<h2>Transitions</h2>
-
-<p>Finally, when an event is called it may trigger a transition. For example the &#8216;cancel&#8217; event could trigger the following transitions:</p>
-
-<ul>
-<li>&#8216;placed&#8217; to &#8216;cancelled&#8217;</li>
-<li>&#8216;held&#8217; to &#8216;cancelled&#8217;</li>
-<li>&#8216;any&#8217; to &#8216;cancelled&#8217;</li>
-</ul>
-
-
-<p>Transitions are useful for triggering processes that should occur in particular cases. For example sending an email when the state of an order changes from &#8216;placed&#8217; to &#8216;cancelled&#8217;.</p>
-
-<h2>So why you should use state machines?</h2>
-
-<p>If it is not clear already the main reason to user them is because a state machine can manage all the complexity of knowing what events and states are available at any given time.</p>
-
-<p>So, that&#8217;s my understanding of state machines so far. I am sure I am missing out some stuff but I believe that the basics are here.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/02/12/the-intuitive-proto-object/">The Intuitive Proto Object in JavaScript</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-02-12T00:00:00+11:00" pubdate data-updated="true">Feb 12<span>th</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Javascript is meant to be a prototypical language. But unfortunately it is a half done prototypical language. Internally it works like this but externally it tries to looks like something else. To understand this let&#8217;s look at the <strong>proto</strong> property.</p>
-
-<p>Take the following code</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'>   <span class="nx">Animal</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">alive</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">legs</span><span class="o">:</span><span class="mi">4</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">person</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">legs</span><span class="o">:</span><span class="mi">2</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="nx">person</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">=</span> <span class="nx">Animal</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">person</span><span class="p">.</span><span class="nx">alive</span><span class="p">);</span>
-</span><span class='line'>  <span class="c1">//true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>It is extremely easy to see what is happening here. We have just created a prototype inheritance chain between &#8216;person&#8217; and &#8216;Animal&#8217;. If you ask for a property or method in &#8216;person&#8217; it will be looked up in that object first, if it is not found there it then will be looked up in the prototype.</p>
-
-<p><strong>proto</strong> looks scary because of all the underscores around the name, but in reality it is quite easy and straightforward to understand and use. Unfortunately the <strong>proto</strong> property is an internal properties only exposed by some browsers (e.g. Chrome, Firefox). So it cannot be used safely.</p>
-
-<p>So sadly we are left with this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'>   <span class="nx">Animal</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">alive</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">legs</span><span class="o">:</span><span class="mi">4</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="nx">Person</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
-</span><span class='line'>      <span class="k">this</span><span class="p">.</span><span class="nx">legs</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="nx">Person</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nx">Animal</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">person</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Person</span><span class="p">();</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">person</span><span class="p">.</span><span class="nx">alive</span><span class="p">);</span> <span class="c1">//true</span>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">person</span><span class="p">.</span><span class="nx">legs</span><span class="p">);</span> <span class="c1">//2</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Note what is happening here:</p>
-
-<ul>
-<li>We need to create a constructor function</li>
-<li>Then we assign &#8216;Animal&#8217; as the prototype of that constructor</li>
-<li>Then we run the function to get the instance we want</li>
-</ul>
-
-
-<p>This is an extremely convoluted process to get to what we want, which is to have an object that inherits from another.</p>
-
-<h2>Object.create</h2>
-
-<p>There is another alternative which is using Object.create:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'>   <span class="nx">Animal</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">alive</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">legs</span><span class="o">:</span><span class="mi">4</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="nx">person</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">Animal</span><span class="p">);</span>
-</span><span class='line'>  <span class="nx">person</span><span class="p">.</span><span class="nx">legs</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">person</span><span class="p">.</span><span class="nx">alive</span><span class="p">);</span> <span class="c1">//true</span>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">person</span><span class="p">.</span><span class="nx">legs</span><span class="p">);</span> <span class="c1">//2</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Object.create makes a new object with the prototype set to the given object. This is heaps better than the function prototype work around. But still using <strong>proto</strong> is a lot more intuitive.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/02/02/founding-the-bounding-box-of-an-svg-path-in-ruby/">Finding the Bounding Box of an SVG Path in Ruby</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-02-02T00:00:00+11:00" pubdate data-updated="true">Feb 2<span>nd</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Here is a way for finding out the bounding box (left, right, width and height) of an SVG path in Ruby. You will need <a href="http://www.imagemagick.org/">ImageMagick</a> and <a href="http://rmagick.rubyforge.org/">RMagick</a> for this. In Javascript this is quite simple using the getBBox method, but I couldn&#8217;t find a similar thing in Ruby.</p>
-
-<p>First install ImageMagick if you don&#8217;t have it already. I like to use Homebrew:</p>
-
-<pre><code>brew install imagemagick
-</code></pre>
-
-<p>Then install RMagick</p>
-
-<pre><code>gem install rmagick
-</code></pre>
-
-<p>With these two requirements in place you can find the bounding box using a script like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'> <span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
-</span><span class='line'>  <span class="nb">require</span> <span class="s1">&#39;RMagick&#39;</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="k">def</span> <span class="nf">find_bounding_box</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-</span><span class='line'>      <span class="kp">include</span> <span class="no">Magick</span>  
-</span><span class='line'>  
-</span><span class='line'>      <span class="c1">#create a drawing object</span>
-</span><span class='line'>      <span class="n">drawing</span> <span class="o">=</span> <span class="no">Magick</span><span class="o">::</span><span class="no">Draw</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'>  
-</span><span class='line'>  
-</span><span class='line'>      <span class="c1">#create a new image for finding out the offset</span>
-</span><span class='line'>      <span class="n">canvas</span> <span class="o">=</span> <span class="no">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">1500</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span> <span class="p">{</span><span class="nb">self</span><span class="o">.</span><span class="n">background_color</span> <span class="o">=</span> <span class="s1">&#39;white&#39;</span> <span class="p">}</span>
-</span><span class='line'>  
-</span><span class='line'>      <span class="c1">#draw the path into the canvas image</span>
-</span><span class='line'>      <span class="n">drawing</span><span class="o">.</span><span class="n">path</span> <span class="n">path</span>
-</span><span class='line'>      <span class="n">drawing</span><span class="o">.</span><span class="n">draw</span> <span class="n">canvas</span>
-</span><span class='line'>  
-</span><span class='line'>      <span class="c1">#trim the whitespace of the image</span>
-</span><span class='line'>      <span class="n">canvas</span><span class="o">.</span><span class="n">trim!</span>   
-</span><span class='line'>  
-</span><span class='line'>      <span class="c1">#here is the bounding box information we are looking for</span>
-</span><span class='line'>      <span class="p">{</span> <span class="ss">:x</span><span class="o">=&gt;</span> <span class="n">canvas</span><span class="o">.</span><span class="n">page</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="ss">:y</span><span class="o">=&gt;</span><span class="n">canvas</span><span class="o">.</span><span class="n">page</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="ss">:width</span><span class="o">=&gt;</span> <span class="n">canvas</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="ss">:height</span><span class="o">=&gt;</span> <span class="n">canvas</span><span class="o">.</span><span class="n">rows</span><span class="p">}</span>
-</span><span class='line'>  <span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Let&#8217;s test it:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'> <span class="n">svg_path</span> <span class="o">=</span> <span class="s2">&quot;M555.545,95.489c-9.67,4.589-19.34,9.178-29.01,13.767c9.097,19.235,18.194,38.47,27.291,57.705c9.667-4.598,19.335-9.196,29.002-13.794C573.733,133.941,564.64,114.715,555.545,95.489z&quot;</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="n">bbox</span> <span class="o">=</span> <span class="n">find_bounding_box</span><span class="p">(</span><span class="n">svg_path</span><span class="p">)</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;x=&quot;</span><span class="o">+</span><span class="n">bbox</span><span class="o">[</span><span class="ss">:x</span><span class="o">].</span><span class="n">to_s</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;y=&quot;</span><span class="o">+</span><span class="n">bbox</span><span class="o">[</span><span class="ss">:y</span><span class="o">].</span><span class="n">to_s</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;width=&quot;</span><span class="o">+</span><span class="n">bbox</span><span class="o">[</span><span class="ss">:width</span><span class="o">].</span><span class="n">to_s</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;height=&quot;</span><span class="o">+</span><span class="n">bbox</span><span class="o">[</span><span class="ss">:height</span><span class="o">].</span><span class="n">to_s</span>
-</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
     <a href="/blog/archives">Blog Archives</a>
@@ -1076,7 +686,7 @@ order.cancel #send the cancel event to the order
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2012/11/15/a-pattern-for-service-objects-in-rails/">A Pattern for Service Objects in Rails</a>
+        <a href="/blog/2012/12/05/amd/">AMD, is not one or the other</a>
       </li>
     
       <li class="post">
@@ -1085,14 +695,6 @@ order.cancel #send the cancel event to the order
     
       <li class="post">
         <a href="/blog/2012/08/18/backbone-ember-canjs/">My experience with Backbone, Ember and CanJS</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2011/05/05/state-machines-are-awesome/">State Machines are Awesome</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2011/02/12/the-intuitive-proto-object/">The Intuitive Proto Object in JavaScript</a>
       </li>
     
   </ul>
