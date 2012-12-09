@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>My experience with Backbone, Ember and CanJS - Sebastian's Blog</title>
+  <title>Don't hate tables - Sebastian's Blog</title>
   <meta name="author" content="Sebastian Porto">
 
   
-  <meta name="description" content="Before coming to the JavaScript world I was doing Flex development, so I was quite familiar with MVC paradigm in the front-end side of applications. &hellip;">
+  <meta name="description" content="Recently I was maintaining a project were the original developer did everything using lists to present data in rows and columns like a table. So to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/">
+  <link rel="canonical" href="http://sporto.github.com/blog/2011/08/01/dont-hate-tables/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -80,7 +80,7 @@
   
   <header>
     
-      <h1 class="entry-title">My Experience With Backbone, Ember and CanJS</h1>
+      <h1 class="entry-title">Don't Hate Tables</h1>
     
     
       <p class="meta">
@@ -96,66 +96,51 @@
   
 
 
-<time datetime="2012-08-18T00:00:00+10:00" pubdate data-updated="true">Aug 18<span>th</span>, 2012</time>
+<time datetime="2011-08-01T09:30:00+10:00" pubdate data-updated="true">Aug 1<span>st</span>, 2011</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>Before coming to the JavaScript world I was doing Flex development, so I was quite familiar with MVC paradigm in the front-end side of applications.</p>
+<div class="entry-content"><p>Recently I was maintaining a project were the original developer did everything using lists to present data in rows and columns like a table.</p>
 
-<p>When I first started using JavaScript I learnt to do things in the usual way of that time - which is having the DOM as the source of truth. e.g. We will add elements to the DOM and if we wanted to know the length of a collection we will just use jQuery to ask the DOM for how many elements there were.</p>
+<p>So to present something like this:</p>
 
-<p>I soon grew tired of this way of doing things, it was just messy.</p>
+<pre><code>&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th &gt;Cosher &lt;/th&gt;
+        &lt;td&gt;To treat with special fondness.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th style='padding-right:12px;'&gt;Flamboyant &lt;/th&gt;
+        &lt;td&gt;strikingly bold or brilliant; showy: flamboyant colors.&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+</code></pre>
 
-<h2>Backbone</h2>
+<p>they were using a ul like this:</p>
 
-<p><a href="http://backbonejs.org/">Backbone</a> captured a lot of attention when it came up, it was the first MVC framework that looked easy to get into. So I decided to try it. It was a great start, the structure of my code started to resemble a lot more what I was used to in Flex e.g. collections, views, controllers.</p>
+<pre><code>&lt;ul&gt;
+    &lt;li&gt;Cosher &lt;span&gt;To treat with special fondness.&lt;/span&gt;&lt;/li&gt;
+    &lt;li&gt;Flamboyant&lt;span&gt;strikingly bold or brilliant; showy: flamboyant colors.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
 
-<p>But there were many times where I would think &#8220;What? Do I need to do this myself? Shouldn&#8217;t Backbone take care of this?&#8221;. For example when a collection changed the view needed to know and I had to hook all these events myself.</p>
+<p>And then styling the list using CSS to make it look like a table.</p>
 
-<p>Another thing that was a let down is that there is no build-in way of doing live binding in the views. You have to do this yourself e.g. re-render a view manually when something changes (via events). Also doing nested views was more complex that it needed to be.</p>
-
-<p>Backbone just left me wanting a lot more from an MVC framework. So I decided that Backbone was not my cup of tea, it wasn&#8217;t really doing enough useful things for me.</p>
-
-<h2>Ember</h2>
-
-<p><a href="http://emberjs.com/">Ember</a> also came up with quite a hype and it looked like the perfect fit for everything I was expecting. It has live binding, a great object model and an excellent template engine.</p>
-
-<p>It takes a while to learn as it deviates quite a bit from the usual way of doing JavaScript, Ember relies heavily on binding instead of events. I got a lot into it, even did a talk about it in my local user group.</p>
-
-<p>I liked it but I wasn&#8217;t completely happy with it because:</p>
+<p>This is a little less markup than a normal table but what for? It seems to me like the &#8216;no tables&#8217; mantra taken to the extreme. This is perfectly appropriate content for a table. And using a table makes better sense because:</p>
 
 <ul>
-<li>It is huge, totally overkill for small projects or mobile apps.</li>
-<li>Performance wise it is not that good either, quite slow compared to Backbone. <a href="http://jsfiddle.net/jashkenas/CGSd5/">http://jsfiddle.net/jashkenas/CGSd5/</a></li>
-<li>It is hard to debug, when something fails it gives you very obscure error messages that are hard to track back to the source.</li>
-<li>It adds scripts tags around elements, which breaks CSS styling in some cases.</li>
-<li>It required me to declare lots of small components, so for simple things I ended up with too many objects.</li>
-<li>It also force me to declare objects in the global space, I couldn&#8217;t find a way of not having to do this.</li>
+<li>Developer looking at the code will immediately know what the intention is</li>
+<li>The code is easier to maintain because you don&#8217;t have to fight with the css to make something look like a table when it is not</li>
+<li>The display is consistent in any browser</li>
+<li>People disabling CSS will still see a table</li>
 </ul>
 
 
-<h2>CanJS</h2>
-
-<p>Then came <a href="http://canjs.us/">CanJS</a> (without the hype of the other two), it is a reboot of the venerable JavascriptMVC project. Bitovi has done a great job at making JavascriptMVC a lot more accessible to newcomers.</p>
-
-<p>CanJS looked intriguing, so I decided to use it in my next project. It was a great success for me. It stroked a great balance between Backbone and Ember. The features I like a lot in CanJS are:</p>
-
-<ul>
-<li>It is quite small, just a bit bigger than Backbone. Tiny compared to Ember.</li>
-<li>It is fast (as fast as Backbone). <a href="http://jsfiddle.net/sporto/Ek9am/">http://jsfiddle.net/sporto/Ek9am/</a></li>
-<li>It has live binding out of the box, and they work perfectly well (although I prefer handlebars, I can live with EJS).</li>
-<li>It is a lot more general purpose than Backbone and Ember. For example CanJS has an observable object that can be used in a huge variety of situations, not just when doing MVC.</li>
-</ul>
-
-
-<p>CanJS has become my MVC library of choice. I really recommend you give it a go in your next project.</p>
-
-<h2>The future</h2>
-
-<p>I am planning to keep using CanJS in the future, but <a href="http://www.angularjs.org/">Angular</a> looks very appealing, I really like the declarative way of doing things directly in html without having to use templates. I am planning to give Angular a go soon.</p>
+<p>So please use tables when appropriate, don&#8217;t hate them.</p>
 </div>
 
 
@@ -178,7 +163,7 @@
   
 
 
-<time datetime="2012-08-18T00:00:00+10:00" pubdate data-updated="true">Aug 18<span>th</span>, 2012</time>
+<time datetime="2011-08-01T09:30:00+10:00" pubdate data-updated="true">Aug 1<span>st</span>, 2011</time>
       
 
 
@@ -186,7 +171,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/" data-via="sebasporto" data-counturl="http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://sporto.github.com/blog/2011/08/01/dont-hate-tables/" data-via="sebasporto" data-counturl="http://sporto.github.com/blog/2011/08/01/dont-hate-tables/" >Tweet</a>
   
   
   
@@ -195,10 +180,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2011/11/06/the-intuitive-proto-object-in-javascript/" title="Previous Post: The Intuitive Proto Object in JavaScript">&laquo; The Intuitive Proto Object in JavaScript</a>
+        <a class="basic-alignment left" href="/blog/2011/06/06/finding-the-bounding-box-of-an-svg-path-in-ruby/" title="Previous Post: Finding the bounding box of an SVG path in Ruby">&laquo; Finding the bounding box of an SVG path in Ruby</a>
       
       
-        <a class="basic-alignment right" href="/blog/2012/09/22/embracing-async-with-deferreds/" title="Next Post: Embracing Async with Deferreds and Promises">Embracing Async with Deferreds and Promises &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2011/10/06/state-machines-are-awesome/" title="Next Post: State machines are awesome">State machines are awesome &raquo;</a>
       
     </p>
   </footer>
@@ -288,8 +273,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/';
-        var disqus_url = 'http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/';
+        var disqus_identifier = 'http://sporto.github.com/blog/2011/08/01/dont-hate-tables/';
+        var disqus_url = 'http://sporto.github.com/blog/2011/08/01/dont-hate-tables/';
         var disqus_script = 'embed.js';
       
     (function () {
