@@ -4,7 +4,7 @@
   <title><![CDATA[Sebastian's Blog]]></title>
   <link href="http://sporto.github.com/atom.xml" rel="self"/>
   <link href="http://sporto.github.com/"/>
-  <updated>2012-12-09T22:49:17+11:00</updated>
+  <updated>2013-02-02T11:21:03+11:00</updated>
   <id>http://sporto.github.com/</id>
   <author>
     <name><![CDATA[Sebastian Porto]]></name>
@@ -12,6 +12,35 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Some impressions on RethinkDB]]></title>
+    <link href="http://sporto.github.com/blog/2013/02/02/some-impressions-on-rethinkdb/"/>
+    <updated>2013-02-02T08:52:00+11:00</updated>
+    <id>http://sporto.github.com/blog/2013/02/02/some-impressions-on-rethinkdb</id>
+    <content type="html"><![CDATA[<p>Tried RethinkDB for a week. Overall it gave me a very good impression.</p>
+
+<ul>
+<li>Very easy to setup and run</li>
+<li>Setting up sharding and replication is quite simple as well</li>
+<li>The composable query language is a big plus. I really like the way I can build queries in my code by adding refinements if I need them. Reminds me of ActiveRecord in Rails.</li>
+<li>The admin interface is gorgeus and super useful, but I wish I could save my queries.</li>
+<li>The developers are very active in IRC and the forum, they responded all my questions very quickly.</li>
+</ul>
+
+
+<p>Some rough edges I came accross are:</p>
+
+<ul>
+<li>Queries that require boolean logic (e.g. ‘where user.id IN (1,2,3) and user.active = 1’ in SQL) are very cumbersome in RethinkDB right now. The good thing is that this is being addressed on the next release.</li>
+<li>I manage to send several JavaScript expressions to the server that made RethinkDB spawn a bunch of processes that ate the machine CPU very quickly, making the DB almost unusable, I had to kill RethinkDB several times because of this. It would be nice if RethinkDB will  prevent this.</li>
+<li>At the moment you cannot connect instances of RethinkDB on different architectures, e.g. Ubuntu to Mac, 32 bits to 64 bits. Again this is in their list of thing to address in the future.</li>
+</ul>
+
+
+<p>At the end of our exploration we ended up with a flat data structure so we reverted back to our established SQL solution. But I look forward to use RethinkDB again soon.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Asynchronous JS: Callbacks, Listeners, Control Flow Libs and Promises]]></title>
@@ -35,7 +64,7 @@
 
 <h2>Callbacks</h2>
 
-<p>Let&#8217;s start with callback pattern, this is the most basic and the best know pattern to deal with async programming.</p>
+<p>Let&#8217;s start with callback pattern, this is the most basic and the best known pattern to deal with async programming.</p>
 
 <p>A callback looks like this:</p>
 
@@ -48,13 +77,11 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>`</p>
-
-<p>In the callback pattern we call a function that will do the asynchronous operation. As one of the parameters we pass a function that will be called when the operation is done.</p>
+<p>In the callback pattern we call a function that will do the asynchronous operation. One of the parameters we pass is a function that will be called when the operation is done.</p>
 
 <h3>Setup</h3>
 
-<p>In order to illustrate how they work we need a couple of functions that will find and process the records. In the real world this functions will make an AJAX request and return the results, but for now let&#8217;s just use timeouts.</p>
+<p>In order to illustrate how they work we need a couple of functions that will find and process the records. In the real world these functions will make an AJAX request and return the results, but for now let&#8217;s just use timeouts.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -102,7 +129,7 @@
 
 <p>We call the first function, passing a callback. Inside this callback we call the second function passing another callback.</p>
 
-<p>These nested callbacks can be written more clear but passing references to a function.</p>
+<p>These nested callbacks can be written more clearly by passing a reference to another function.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -135,7 +162,7 @@
 <h3>Pros</h3>
 
 <ul>
-<li>They are very well know pattern, so they are easy to understand.</li>
+<li>They are a very well know pattern, so they are familiar thus easy to understand.</li>
 <li>Very easy to implement in your own libraries / functions.</li>
 </ul>
 
@@ -143,8 +170,8 @@
 <h3>Cons</h3>
 
 <ul>
-<li>Nested callbacks will form the infamous pyramid of doom as shown above, which can get hard to read when you have many levels deep. But this is quite easy to fix by splitting the functions also as shown above.</li>
-<li>You can only pass one callback for a given event, this can be a big limitation sometimes.</li>
+<li>Nested callbacks will form the infamous pyramid of doom as shown above, which can get hard to read when you have multiple nested levels. But this is quite easy to fix by splitting the functions also as shown above.</li>
+<li>You can only pass one callback for a given event, this can be a big limitation in many cases.</li>
 </ul>
 
 
@@ -168,11 +195,11 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>We call a function on an object that adds a listener. In that function we usually pass the name of the event we want to listen to and a callback function. &#8216;on&#8217; is one of many common way of adding listeners, other common function names you will come across are &#8216;bind&#8217;, &#8216;listen&#8217;, &#8216;addEventListener&#8217;, &#8216;observe&#8217;.</p>
+<p>We call a function on an object that adds a listener. In that function we pass the name of the event we want to listen to and a callback function. &#8216;on&#8217; is one of many common name for this function, other common names you will come across are &#8216;bind&#8217;, &#8216;listen&#8217;, &#8216;addEventListener&#8217;, &#8216;observe&#8217;.</p>
 
 <h3>Setup</h3>
 
-<p>Let&#8217;s do some setup for a listener demonstration. Unfortunately the setup needed is a bit more involving than the callbacks example.</p>
+<p>Let&#8217;s do some setup for a listener demonstration. Unfortunately the setup needed is a bit more involving than in the callbacks example.</p>
 
 <p>First we need a couple of objects that will do the work of finding and processing the records.</p>
 
@@ -215,7 +242,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Note that they are calling a method trigger when the work is done, I will add this method to these objects using a mix-in. Again &#8216;trigger&#8217; is one of the names you will come across, others are &#8216;fire&#8217;, &#8216;publish&#8217;.</p>
+<p>Note that they are calling a method <strong>trigger</strong> when the work is done, I will add this method to these objects using a mix-in. Again &#8216;trigger&#8217; is one of the names you will come across, others common names are &#8216;fire&#8217; and &#8216;publish&#8217;.</p>
 
 <p>We need a mix-in object that has the listener behaviour, in this case I will just lean on jQuery for this:</p>
 
@@ -247,7 +274,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Excellent, now our objects can add listeners and trigger events.</p>
+<p>Excellent, now our objects can take listeners and trigger events.</p>
 
 <h3>Using the listeners</h3>
 
@@ -305,7 +332,7 @@
 <h3>Cons</h3>
 
 <ul>
-<li>A bit more difficult to setup than callbacks in your own code, you will probably want to use a library e.g. jQuery, bean.</li>
+<li>A bit more difficult to setup than callbacks in your own code, you will probably want to use a library e.g. jQuery, <a href="https://github.com/fat/bean">bean.js</a>.</li>
 </ul>
 
 
@@ -320,7 +347,7 @@
 
 <p>Flow control libraries are also a very nice way to deal with asynchronous code. One I particularly like is <a href="https://github.com/caolan/async">Async.js</a>.</p>
 
-<p>Code using Async looks like this:</p>
+<p>Code using Async.js looks like this:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -333,7 +360,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h4>Setup (Example 1)</h4>
+<h3>Setup (Example 1)</h3>
 
 <p>Again we need a couple of functions that will do the work, as in the other examples these functions in the real world will probably make an AjAX request and return the results. For now let&#8217;s just use timeouts.</p>
 
@@ -366,7 +393,7 @@
 
 <h4>The Node Continuation Passing Style</h4>
 
-<p>Note the style used in the callbacks inside these functions.</p>
+<p>Note the style used in the callbacks inside the functions above.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">cb</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">records</span><span class="p">);</span>
@@ -400,7 +427,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Async.js takes care of calling each function in order after the previous one has finished. Note how we can just past the &#8216;processor&#8217; function, this is because we are using the Node continuation style. As you can see this code is quite minimal and easy to understand.</p>
+<p>Async.js takes care of calling each function in order after the previous one has finished. Note how we can just pass the &#8216;processor&#8217; function, this is because we are using the Node continuation style. As you can see this code is quite minimal and easy to understand.</p>
 
 <p>Working example here:</p>
 
@@ -473,7 +500,7 @@
 
 
 <p>​
-It becomes a lot more convoluted but style you can see the flow going from top to bottom.</p>
+It becomes a lot more convoluted but at least you can see the flow going from top to bottom.</p>
 
 <p>Working example here:</p>
 
@@ -490,7 +517,7 @@ It becomes a lot more convoluted but style you can see the flow going from top t
 <h3>Cons</h3>
 
 <ul>
-<li>If the signatures don&#8217;t match as in the second example then you can argue that the flow control library offers little in terms of readability.</li>
+<li>If the signatures of the functions don&#8217;t match as in the second example then you can argue that the flow control library offers little in terms of readability.</li>
 </ul>
 
 
@@ -578,42 +605,49 @@ It becomes a lot more convoluted but style you can see the flow going from top t
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>As you can see it is quite minimal and easy to understand. When used like this promises bring a lot of clarity to your code as they follow a natural flow. Note how in the first callback we can simply pass the &#8216;processor&#8217; function. This is because this function returns a promise itself so everything will just flow nicely.</p>
+<p>As you can see, it is quite minimal and easy to understand. When used like this, promises bring a lot of clarity to your code as they follow a natural flow. Note how in the first callback we can simply pass the &#8216;processor&#8217; function. This is because this function returns a promise itself so everything will just flow nicely.</p>
 
 <p>Working example here:</p>
 
 <iframe style="width: 100%; height: 300px" src="http://jsfiddle.net/Rhjbn/embedded/js,result/light/"></iframe>
 
 
-<p>There is a lot to promises, they can be passed around and aggregated into bigger promises, resolved or rejected.</p>
+<p>There is a lot to promises:</p>
+
+<ul>
+<li>they can be passed around as regular objects</li>
+<li>aggregated into bigger promises</li>
+<li>you can add handlers for failed promises</li>
+</ul>
+
 
 <h3>The big benefit of promises</h3>
 
-<p>Now if you think that this is all there is to promises you are missing the what I consider the biggest advantage. Promises have a neat trick that neither callbacks, listeners or control flows can do. You can add listener to promises even when they have already resolved and those listener will trigger immediately, meaning that you don&#8217;t have to worry if the event has already happened. Let me show you an example of this last point:</p>
+<p>Now if you think that this is all there is to promises you are missing what I consider the biggest advantage. Promises have a neat trick that neither callbacks, listeners or control flows can do. You can add a listener to promise even when it has already been resolved, in this case that listener will trigger immediately, meaning that you don&#8217;t have to worry if the event has already happened when you add the listener. This works the same for aggregated promises. Let me show you an example of this:</p>
 
 <iframe style="width: 100%; height: 300px" src="http://jsfiddle.net/8zjGq/embedded/js,result/light/"></iframe>
 
 
-<p>This is a huge feature for dealing with user interaction in the browser. In complex applications you may not now the order of actions that the user will take, so promises are an excellent tool for dealing with this. See this other <a href="http://sporto.github.com/blog/2012/09/22/embracing-async-with-deferreds/">post</a>.</p>
+<p>This is a huge feature for dealing with user interaction in the browser. In complex applications you may not now the order of actions that the user will take, so you can use promises to track use interaction. See this other <a href="http://sporto.github.com/blog/2012/09/22/embracing-async-with-deferreds/">post</a> if interested.</p>
 
 <h3>Pros</h3>
 
 <ul>
-<li>Really powerful, you can aggregate promises, pass the around, or add listeners when already resolved.</li>
+<li>Really powerful, you can aggregate promises, pass them around, or add listeners when already resolved.</li>
 </ul>
 
 
 <h3>Cons</h3>
 
 <ul>
-<li>Least understood of all of these tools.</li>
+<li>The least understood of all these tools.</li>
 <li>They can get difficult to track when you have lots of aggregated promises with added listeners along the way.</li>
 </ul>
 
 
 <h2>Conclusion</h2>
 
-<p>These are in my opinion the four main tools for dealing with asynchronous code. Hopefully I have help you to understand these tools better.</p>
+<p>That&#8217;s it! These are in my opinion the four main tools for dealing with asynchronous code. Hopefully I have help you to understand them better and gave you more options for you asynchronous needs.</p>
 ]]></content>
   </entry>
   

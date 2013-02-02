@@ -5,11 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>My experience with Backbone, Ember and CanJS - Sebastian's Blog</title>
+  <title>Some impressions on RethinkDB - Sebastian's Blog</title>
   <meta name="author" content="Sebastian Porto">
 
   
-  <meta name="description" content="Before coming to the JavaScript world I was doing Flex development, so I was quite familiar with MVC paradigm in the front-end side of applications. &hellip;">
+  <meta name="description" content="Tried RethinkDB for a week. Overall it gave me a very good impression. Very easy to setup and run
+Setting up sharding and replication is quite simple &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/">
+  <link rel="canonical" href="http://sporto.github.com/blog/2013/02/02/some-impressions-on-rethinkdb/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -80,7 +81,7 @@
   
   <header>
     
-      <h1 class="entry-title">My Experience With Backbone, Ember and CanJS</h1>
+      <h1 class="entry-title">Some Impressions on RethinkDB</h1>
     
     
       <p class="meta">
@@ -96,66 +97,34 @@
   
 
 
-<time datetime="2012-08-18T00:00:00+10:00" pubdate data-updated="true">Aug 18<span>th</span>, 2012</time>
+<time datetime="2013-02-02T08:52:00+11:00" pubdate data-updated="true">Feb 2<span>nd</span>, 2013</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>Before coming to the JavaScript world I was doing Flex development, so I was quite familiar with MVC paradigm in the front-end side of applications.</p>
-
-<p>When I first started using JavaScript I learnt to do things in the usual way of that time - which is having the DOM as the source of truth. e.g. We will add elements to the DOM and if we wanted to know the length of a collection we will just use jQuery to ask the DOM for how many elements there were.</p>
-
-<p>I soon grew tired of this way of doing things, it was just messy.</p>
-
-<h2>Backbone</h2>
-
-<p><a href="http://backbonejs.org/">Backbone</a> captured a lot of attention when it came up, it was the first MVC framework that looked easy to get into. So I decided to try it. It was a great start, the structure of my code started to resemble a lot more what I was used to in Flex e.g. collections, views, controllers.</p>
-
-<p>But there were many times where I would think &#8220;What? Do I need to do this myself? Shouldn&#8217;t Backbone take care of this?&#8221;. For example when a collection changed the view needed to know and I had to hook all these events myself.</p>
-
-<p>Another thing that was a let down is that there is no build-in way of doing live binding in the views. You have to do this yourself e.g. re-render a view manually when something changes (via events). Also doing nested views was more complex that it needed to be.</p>
-
-<p>Backbone just left me wanting a lot more from an MVC framework. So I decided that Backbone was not my cup of tea, it wasn&#8217;t really doing enough useful things for me.</p>
-
-<h2>Ember</h2>
-
-<p><a href="http://emberjs.com/">Ember</a> also came up with quite a hype and it looked like the perfect fit for everything I was expecting. It has live binding, a great object model and an excellent template engine.</p>
-
-<p>It takes a while to learn as it deviates quite a bit from the usual way of doing JavaScript, Ember relies heavily on binding instead of events. I got a lot into it, even did a talk about it in my local user group.</p>
-
-<p>I liked it but I wasn&#8217;t completely happy with it because:</p>
+<div class="entry-content"><p>Tried RethinkDB for a week. Overall it gave me a very good impression.</p>
 
 <ul>
-<li>It is huge, totally overkill for small projects or mobile apps.</li>
-<li>Performance wise it is not that good either, quite slow compared to Backbone. <a href="http://jsfiddle.net/jashkenas/CGSd5/">http://jsfiddle.net/jashkenas/CGSd5/</a></li>
-<li>It is hard to debug, when something fails it gives you very obscure error messages that are hard to track back to the source.</li>
-<li>It adds scripts tags around elements, which breaks CSS styling in some cases.</li>
-<li>It required me to declare lots of small components, so for simple things I ended up with too many objects.</li>
-<li>It also force me to declare objects in the global space, I couldn&#8217;t find a way of not having to do this.</li>
+<li>Very easy to setup and run</li>
+<li>Setting up sharding and replication is quite simple as well</li>
+<li>The composable query language is a big plus. I really like the way I can build queries in my code by adding refinements if I need them. Reminds me of ActiveRecord in Rails.</li>
+<li>The admin interface is gorgeus and super useful, but I wish I could save my queries.</li>
+<li>The developers are very active in IRC and the forum, they responded all my questions very quickly.</li>
 </ul>
 
 
-<h2>CanJS</h2>
-
-<p>Then came <a href="http://canjs.us/">CanJS</a> (without the hype of the other two), it is a reboot of the venerable JavascriptMVC project. Bitovi has done a great job at making JavascriptMVC a lot more accessible to newcomers.</p>
-
-<p>CanJS looked intriguing, so I decided to use it in my next project. It was a great success for me. It stroked a great balance between Backbone and Ember. The features I like a lot in CanJS are:</p>
+<p>Some rough edges I came accross are:</p>
 
 <ul>
-<li>It is quite small, just a bit bigger than Backbone. Tiny compared to Ember.</li>
-<li>It is fast (as fast as Backbone). <a href="http://jsfiddle.net/sporto/Ek9am/">http://jsfiddle.net/sporto/Ek9am/</a></li>
-<li>It has live binding out of the box, and they work perfectly well (although I prefer handlebars, I can live with EJS).</li>
-<li>It is a lot more general purpose than Backbone and Ember. For example CanJS has an observable object that can be used in a huge variety of situations, not just when doing MVC.</li>
+<li>Queries that require boolean logic (e.g. ‘where user.id IN (1,2,3) and user.active = 1’ in SQL) are very cumbersome in RethinkDB right now. The good thing is that this is being addressed on the next release.</li>
+<li>I manage to send several JavaScript expressions to the server that made RethinkDB spawn a bunch of processes that ate the machine CPU very quickly, making the DB almost unusable, I had to kill RethinkDB several times because of this. It would be nice if RethinkDB will  prevent this.</li>
+<li>At the moment you cannot connect instances of RethinkDB on different architectures, e.g. Ubuntu to Mac, 32 bits to 64 bits. Again this is in their list of thing to address in the future.</li>
 </ul>
 
 
-<p>CanJS has become my MVC library of choice. I really recommend you give it a go in your next project.</p>
-
-<h2>The future</h2>
-
-<p>I am planning to keep using CanJS in the future, but <a href="http://www.angularjs.org/">Angular</a> looks very appealing, I really like the declarative way of doing things directly in html without having to use templates. I am planning to give Angular a go soon.</p>
+<p>At the end of our exploration we ended up with a flat data structure so we reverted back to our established SQL solution. But I look forward to use RethinkDB again soon.</p>
 </div>
 
 
@@ -178,7 +147,7 @@
   
 
 
-<time datetime="2012-08-18T00:00:00+10:00" pubdate data-updated="true">Aug 18<span>th</span>, 2012</time>
+<time datetime="2013-02-02T08:52:00+11:00" pubdate data-updated="true">Feb 2<span>nd</span>, 2013</time>
       
 
 
@@ -186,7 +155,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/" data-via="sebasporto" data-counturl="http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://sporto.github.com/blog/2013/02/02/some-impressions-on-rethinkdb/" data-via="sebasporto" data-counturl="http://sporto.github.com/blog/2013/02/02/some-impressions-on-rethinkdb/" >Tweet</a>
   
   
   
@@ -195,10 +164,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2011/11/06/the-intuitive-proto-object-in-javascript/" title="Previous Post: The Intuitive Proto Object in JavaScript">&laquo; The Intuitive Proto Object in JavaScript</a>
+        <a class="basic-alignment left" href="/blog/2012/12/09/callbacks-listeners-promises/" title="Previous Post: Asynchronous JS: Callbacks, Listeners, Control Flow Libs and Promises">&laquo; Asynchronous JS: Callbacks, Listeners, Control Flow Libs and Promises</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2012/09/22/embracing-async-with-deferreds/" title="Next Post: Embracing Async with Deferreds and Promises">Embracing Async with Deferreds and Promises &raquo;</a>
       
     </p>
   </footer>
@@ -288,8 +255,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/';
-        var disqus_url = 'http://sporto.github.com/blog/2012/08/18/backbone-ember-canjs/';
+        var disqus_identifier = 'http://sporto.github.com/blog/2013/02/02/some-impressions-on-rethinkdb/';
+        var disqus_url = 'http://sporto.github.com/blog/2013/02/02/some-impressions-on-rethinkdb/';
         var disqus_script = 'embed.js';
       
     (function () {
