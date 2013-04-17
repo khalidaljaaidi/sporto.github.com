@@ -4,7 +4,7 @@
   <title><![CDATA[Sebastian's Blog]]></title>
   <link href="http://sporto.github.com/atom.xml" rel="self"/>
   <link href="http://sporto.github.com/"/>
-  <updated>2013-04-18T09:05:42+10:00</updated>
+  <updated>2013-04-18T09:06:31+10:00</updated>
   <id>http://sporto.github.com/</id>
   <author>
     <name><![CDATA[Sebastian Porto]]></name>
@@ -517,7 +517,7 @@
 
 <p>I strongly feel that you should think twice before using Backbone in new projects. This is mostly because of its lack of features and developer convenience. Backbone can be very tempting because of its big community and the ecosystem, but this advantage will dissapear as the other frameworks become more popular.</p>
 
-<p><strong>Update 18/04/2013</strong>: Made it clear that the last section is just my opinion. Removed the inflamatory &#8220;It is time to move on&#8221; statement.</p>
+<p><strong>Update 18/04/2013</strong>: Made it clear that the last section is just my opinion. Removed the inflammatory &#8220;It is time to move on&#8221; statement.</p>
 ]]></content>
   </entry>
   
