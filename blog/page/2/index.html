@@ -9,7 +9,7 @@
   <meta name="author" content="Sebastian Porto">
 
   
-  <meta name="description" content="Here is a way for finding out the bounding box (left, right, width and height) of an SVG path in Ruby. You will need ImageMagick and RMagick for this &hellip;">
+  <meta name="description" content="Recently I was maintaining a project were the original developer did everything using lists to present data in rows and columns like a table. So to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,79 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/08/01/dont-hate-tables/">Don&#8217;t Hate Tables</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-08-01T09:30:00+10:00" pubdate data-updated="true">Aug 1<span>st</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Recently I was maintaining a project were the original developer did everything using lists to present data in rows and columns like a table.</p>
+
+<p>So to present something like this:</p>
+
+<pre><code>&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th &gt;Cosher &lt;/th&gt;
+        &lt;td&gt;To treat with special fondness.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th style='padding-right:12px;'&gt;Flamboyant &lt;/th&gt;
+        &lt;td&gt;strikingly bold or brilliant; showy: flamboyant colors.&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+</code></pre>
+
+<p>they were using a ul like this:</p>
+
+<pre><code>&lt;ul&gt;
+    &lt;li&gt;Cosher &lt;span&gt;To treat with special fondness.&lt;/span&gt;&lt;/li&gt;
+    &lt;li&gt;Flamboyant&lt;span&gt;strikingly bold or brilliant; showy: flamboyant colors.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<p>And then styling the list using CSS to make it look like a table.</p>
+
+<p>This is a little less markup than a normal table but what for? It seems to me like the &#8216;no tables&#8217; mantra taken to the extreme. This is perfectly appropriate content for a table. And using a table makes better sense because:</p>
+
+<ul>
+<li>Developer looking at the code will immediately know what the intention is</li>
+<li>The code is easier to maintain because you don&#8217;t have to fight with the css to make something look like a table when it is not</li>
+<li>The display is consistent in any browser</li>
+<li>People disabling CSS will still see a table</li>
+</ul>
+
+
+<p>So please use tables when appropriate, don&#8217;t hate them.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -215,6 +288,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/04/12/comparison-angular-backbone-can-ember/">A comparison of Angular, Backbone, CanJS and Ember</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/02/22/a-plain-english-guide-to-javascript-prototypes/">A plain english guide to JavaScript prototypes</a>
       </li>
     
@@ -228,10 +305,6 @@
     
       <li class="post">
         <a href="/blog/2012/12/05/amd/">AMD, is not one or the other</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/11/15/a-pattern-for-service-objects-in-rails/">A Pattern for Service Objects in Rails</a>
       </li>
     
   </ul>
