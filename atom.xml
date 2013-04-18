@@ -4,7 +4,7 @@
   <title><![CDATA[Sebastian's Blog]]></title>
   <link href="http://sporto.github.com/atom.xml" rel="self"/>
   <link href="http://sporto.github.com/"/>
-  <updated>2013-04-18T09:06:31+10:00</updated>
+  <updated>2013-04-19T07:48:25+10:00</updated>
   <id>http://sporto.github.com/</id>
   <author>
     <name><![CDATA[Sebastian Porto]]></name>
@@ -513,9 +513,15 @@
 
 <h2>A note about Backbone (Impartiality ends here)</h2>
 
-<p>I have tried to stay impartial during my post but I cannot finish it without sharing my current opinion about Backbone. It was a great library two years ago, but I am convinced that <strong>there are better things now</strong>. I believe that many people choose Backbone just because of its popularity, it is a vicious circle.</p>
+<p>I have tried to stay impartial during my post but I cannot finish it without sharing my current opinion about Backbone.</p>
 
-<p>I strongly feel that you should think twice before using Backbone in new projects. This is mostly because of its lack of features and developer convenience. Backbone can be very tempting because of its big community and the ecosystem, but this advantage will dissapear as the other frameworks become more popular.</p>
+<p>Backbone was a great library two years ago, but I am convinced that <strong>there are better things now</strong>. I believe that many people choose Backbone just because of its popularity, it is a vicious circle.</p>
+
+<p>Backbone trumps ultimate flexibility over developer convenience. But I think that it has traded too much as it seriously lacks features and developer productivity. Yes, there are lots of plug-ins to compensate for this, but then you will be learning Backbone and something else on top.</p>
+
+<p>Backbone can also be very tempting because of its big community and the ecosystem, but this advantage will disappear as the other frameworks become more popular.</p>
+
+<p>Because of this I strongly feel that you should think twice before using Backbone in new projects.</p>
 
 <p><strong>Update 18/04/2013</strong>: Made it clear that the last section is just my opinion. Removed the inflammatory &#8220;It is time to move on&#8221; statement.</p>
 ]]></content>
