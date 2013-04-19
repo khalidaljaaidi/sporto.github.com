@@ -4,7 +4,7 @@
   <title><![CDATA[Sebastian's Blog]]></title>
   <link href="http://sporto.github.com/atom.xml" rel="self"/>
   <link href="http://sporto.github.com/"/>
-  <updated>2013-04-19T07:48:25+10:00</updated>
+  <updated>2013-04-20T07:57:12+10:00</updated>
   <id>http://sporto.github.com/</id>
   <author>
     <name><![CDATA[Sebastian Porto]]></name>
@@ -487,6 +487,35 @@
 </table>
 
 
+<h2>Testability</h2>
+
+<p><strong>How easy is to test you code?</strong>
+The keys to have great testable code are <strong>modularity</strong> (have small pieces that can be tested in isolation) and <strong>dependency injection</strong> (being able to change dependencies in your tests).</p>
+
+<p>You can do this with any of the frameworks if you learn the right patterns, but it is not easy and it requires you to get out of your way to apply them.</p>
+
+<p>The developers of <strong>Angular</strong> have taken the bull by the horns and built the whole framework with modularity and dependency injection as core features. Angular shoves the right patterns for testable code upon us.</p>
+
+<table>
+<thead>
+<tr>
+<th>Angular </th>
+<th> Backbone </th>
+<th> CanJS </th>
+<th> Ember</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5       </td>
+<td> 3        </td>
+<td> 3     </td>
+<td> 3</td>
+</tr>
+</tbody>
+</table>
+
+
 <h2>Personal taste</h2>
 
 <p>This is probably one of the biggest factors when choosing a library.</p>
@@ -517,13 +546,14 @@
 
 <p>Backbone was a great library two years ago, but I am convinced that <strong>there are better things now</strong>. I believe that many people choose Backbone just because of its popularity, it is a vicious circle.</p>
 
-<p>Backbone trumps ultimate flexibility over developer convenience. But I think that it has traded too much as it seriously lacks features and developer productivity. Yes, there are lots of plug-ins to compensate for this, but then you will be learning Backbone and something else on top.</p>
+<p>Backbone trumps ultimate flexibility over developer convenience. But I think that it has traded too much, as it seriously lacks features and developer productivity. Yes, there are lots of plug-ins to compensate for this, but then you will be learning Backbone and something else on top.</p>
 
 <p>Backbone can also be very tempting because of its big community and the ecosystem, but this advantage will disappear as the other frameworks become more popular.</p>
 
-<p>Because of this I strongly feel that you should think twice before using Backbone in new projects.</p>
+<p>Because of this I strongly feel that you should think twice before choosing Backbone for your next project.</p>
 
-<p><strong>Update 18/04/2013</strong>: Made it clear that the last section is just my opinion. Removed the inflammatory &#8220;It is time to move on&#8221; statement.</p>
+<p><strong>Update 20/04/2013</strong>: Added testability.
+<strong>Update 18/04/2013</strong>: Made it clear that the last section is just my opinion. Removed the inflammatory &#8220;It is time to move on&#8221; statement.</p>
 ]]></content>
   </entry>
   
