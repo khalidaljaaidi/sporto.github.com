@@ -9,7 +9,7 @@
   <meta name="author" content="Sebastian Porto">
 
   
-  <meta name="description" content="Recently I was maintaining a project were the original developer did everything using lists to present data in rows and columns like a table. So to &hellip;">
+  <meta name="description" content="Being mostly a self taught developer, nobody ever taught me what a state machine was. When I finally stumbled upon them I realised I have been &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,118 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/10/06/state-machines-are-awesome/">State Machines Are Awesome</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-10-06T09:29:00+11:00" pubdate data-updated="true">Oct 6<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Being mostly a self taught developer, nobody ever taught me what a state machine was. When I finally stumbled upon them I realised I have been missing out by not using them before.</p>
+
+<p>When I first started learning about them I couldn&#8217;t find a good explanation in plain english. So here is my attempt to explain state machines in a simple way and why you should use them.</p>
+
+<p>The code examples below are in Ruby using the <a href="https://github.com/pluginaweek/state_machine">state_machine</a> gem. But this are general concepts for any language.</p>
+
+<h2>What is a state machine?</h2>
+
+<p>In essence a state machine tracks the state of an object and describes the actions that this object can perform at any given time.</p>
+
+<p>A state machine has several components: states, events and transitions.</p>
+
+<h2>States</h2>
+
+<p>Let&#8217;s say we have an &#8216;order&#8217; object. We could use a state machine to track the state of our order. The order could have the following states:</p>
+
+<ul>
+<li>Open</li>
+<li>Placed</li>
+<li>Held</li>
+<li>Cancelled</li>
+<li>Shipped</li>
+<li>Returned</li>
+</ul>
+
+
+<p>The subject of the state machine can be in only one state at any given  time. The order can either be &#8216;Held&#8217; or &#8216;Shipped&#8217;. These are the states. And we can have only one.</p>
+
+<p>If we want to have two states at the same time we would need to have two state machine running in parallel.</p>
+
+<h2>Events</h2>
+
+<p>We can define events that our state machine can perform. For example:</p>
+
+<ul>
+<li>Create</li>
+<li>Cancel</li>
+<li>Hold</li>
+<li>Ship</li>
+<li>Return</li>
+</ul>
+
+
+<p>Not all events can be called at any time, the available events are dependant on the current state of the object.  A state machine manages this logic for us.</p>
+
+<p>In Ruby (using state_machine) we could do something like this:</p>
+
+<pre><code>order.can_cancel? #ask if the order can be cancelled at this time
+order.cancel #send the cancel event to the order
+</code></pre>
+
+<p>The following diagram shows the state machine flow.</p>
+
+<p><img src="https://docs.google.com/drawings/pub?id=178_CnXn19xnNumvnBY8BxIsJQ245rdoyzvUOwN-MQqM&amp;w=528&amp;h=413"></p>
+
+<p>So as you can see in the diagram there are predetermined paths that the state machine can follow. It can move from the &#8216;Created&#8217; state to the &#8216;Placed&#8217; state but not to the &#8216;Shipped&#8217; state.</p>
+
+<p>The state machine will complain if you try to call an event that is not permitted depending on the current state.</p>
+
+<h2>Transitions</h2>
+
+<p>Finally, when an event is called it may trigger a transition. For example the &#8216;cancel&#8217; event could trigger the following transitions:</p>
+
+<ul>
+<li>&#8216;placed&#8217; to &#8216;cancelled&#8217;</li>
+<li>&#8216;held&#8217; to &#8216;cancelled&#8217;</li>
+<li>&#8216;any&#8217; to &#8216;cancelled&#8217;</li>
+</ul>
+
+
+<p>Transitions are useful for triggering processes that should occur in particular cases. For example sending an email when the state of an order changes from &#8216;placed&#8217; to &#8216;cancelled&#8217;.</p>
+
+<h2>So why you should use state machines?</h2>
+
+<p>If it is not clear already the main reason to user them is because a state machine can manage all the complexity of knowing what events and states are available at any given time.</p>
+
+<p>So, that&#8217;s my understanding of state machines so far. I am sure I am missing out some stuff but I believe that the basics are here.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -288,6 +400,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/06/23/sharing-simple-business-logic-between-the-client-and-front-end-with-rails/">Sharing simple business logic between the client and front end with Rails</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/04/12/comparison-angular-backbone-can-ember/">A comparison of Angular, Backbone, CanJS and Ember</a>
       </li>
     
@@ -301,10 +417,6 @@
     
       <li class="post">
         <a href="/blog/2012/12/09/callbacks-listeners-promises/">Asynchronous JS: Callbacks, Listeners, Control Flow Libs and Promises</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/12/05/amd/">AMD, is not one or the other</a>
       </li>
     
   </ul>
