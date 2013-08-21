@@ -4,7 +4,7 @@
   <title><![CDATA[Sebastian's Blog]]></title>
   <link href="http://sporto.github.com/atom.xml" rel="self"/>
   <link href="http://sporto.github.com/"/>
-  <updated>2013-06-23T21:39:49+10:00</updated>
+  <updated>2013-08-22T08:22:05+10:00</updated>
   <id>http://sporto.github.com/</id>
   <author>
     <name><![CDATA[Sebastian Porto]]></name>
@@ -12,6 +12,504 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Comparing Concurrency in Node and Go]]></title>
+    <link href="http://sporto.github.com/blog/2013/08/18/concurrency-node-vs-go/"/>
+    <updated>2013-08-18T07:40:00+10:00</updated>
+    <id>http://sporto.github.com/blog/2013/08/18/concurrency-node-vs-go</id>
+    <content type="html"><![CDATA[<p>The <a href="http://golang.org/">Go programming language</a> has capture my attention lately. There are several things I really like about:</p>
+
+<ul>
+<li>Simplicity: Go is a small language but still very flexible, I appreciate this simplicity as it can be learnt fairly quick.</li>
+<li>Static typing: I like knowing that my code is correct without having to write a bunch of test you to deal with the lack of static typing.</li>
+<li>No classes: Instead of classes Go simply uses interfaces to determine what objects has what methods, I personally find this a flexible and powerful approach.</li>
+<li>Concurrency primitives: Go has baked in all the necessary language constructs for dealing with concurrency in a clean and coherent way.</li>
+</ul>
+
+
+<p>As part of learning Go I wanted to compare how concurrency compares to Node. For this I created a simple prototype that captures a common pattern:</p>
+
+<p><img src="https://docs.google.com/drawings/d/1I-CqdRyXtQ0ZVFPh1kn8-jVC3jWMRgVYmv6EIH2NDxk/pub?w=486&amp;h=216"></p>
+
+<ul>
+<li>Fetch two values from different urls in parallel.</li>
+<li>When those two values have arrived, send them together to another url.</li>
+</ul>
+
+
+<h2>The Server</h2>
+
+<p>I made a simple Node server for this. <a href="https://gist.github.com/sporto/6258909#file-server-js">The code is here</a>. This server has the following API:</p>
+
+<ul>
+<li>http://localhost:8080/x => returns &#8220;Hello&#8221;</li>
+<li>http://localhost:8080/y => returns &#8220;World&#8221;</li>
+<li>http://localhost:8080/concat?x=value&amp;y=value => takes two values and returns them concatenated</li>
+</ul>
+
+
+<h2>The Node Client</h2>
+
+<p>For the Node code I am using promises, <a href="https://gist.github.com/sporto/6258909#file-client-js">here is the complete client code in JavaScript</a>.</p>
+
+<p>Note the following lines:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">request</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">Q</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;q&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">defX</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span> <span class="c1">// will be resolved when x arrives</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">defY</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span> <span class="c1">// will be resolved when y arrives</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">oneAndTwo</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">all</span><span class="p">([</span><span class="nx">defX</span><span class="p">.</span><span class="nx">promise</span><span class="p">,</span> <span class="nx">defY</span><span class="p">.</span><span class="nx">promise</span><span class="p">]).</span><span class="nx">then</span><span class="p">(</span><span class="nx">processConcat</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">baseUrl</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:8080&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">request</span><span class="p">(</span><span class="nx">baseUrl</span> <span class="o">+</span> <span class="s1">&#39;/x&#39;</span><span class="p">,</span> <span class="nx">makeValueHandler</span><span class="p">(</span><span class="nx">defX</span><span class="p">));</span>
+</span><span class='line'><span class="nx">request</span><span class="p">(</span><span class="nx">baseUrl</span> <span class="o">+</span> <span class="s1">&#39;/y&#39;</span><span class="p">,</span> <span class="nx">makeValueHandler</span><span class="p">(</span><span class="nx">defY</span><span class="p">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I create two deferreds: defX and defY. Then I create a promise that is the combination of defX and defY.</p>
+
+<p>Immediately after that I make the first two calls to the server in parallel. When those to calls are done the deferreds will be resolved and the function <code>processConcat</code> will be called with the results (in the correct order).</p>
+
+<p>The JavaScript code is not complex but is not completely straightforward either, you still need to scan up and down when reading the source code to understand exactly what is happening.</p>
+
+<h2>The Go Client</h2>
+
+<p>The complete client in <a href="[https://gist.github.com/sporto/6258909#file-client-go">Go is here</a>.</p>
+
+<p>The key lines of code are below:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">var</span> <span class="n">cx</span> <span class="k">chan</span> <span class="nb">string</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="nb">string</span><span class="p">)</span>
+</span><span class='line'><span class="k">var</span> <span class="n">cy</span> <span class="k">chan</span> <span class="nb">string</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="nb">string</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">go</span> <span class="n">getValue</span><span class="p">(</span><span class="s">&quot;/x&quot;</span><span class="p">,</span> <span class="n">cx</span><span class="p">)</span>
+</span><span class='line'><span class="k">go</span> <span class="n">getValue</span><span class="p">(</span><span class="s">&quot;/y&quot;</span><span class="p">,</span> <span class="n">cy</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">x</span> <span class="p">:=</span> <span class="p">&lt;-</span><span class="n">cx</span>
+</span><span class='line'><span class="n">y</span> <span class="p">:=</span> <span class="p">&lt;-</span><span class="n">cy</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">processConcat</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here we create two channels (a way of communicating when using concurrent processes in Go), one for value x and the other for value y.</p>
+
+<p>Immediately after that we fetch the values from the server but using the special <code>go</code> keyword. This means that those call will be made in their own processes so they will not block. These two requests happen in parallel.</p>
+
+<p>The next two lines wait for the results of the API calls, the results are communicated using the channels.</p>
+
+<p>The Go code looks a lot like typical sync code but still it is all happing in parallel thanks to the goroutines. So this code is as fast (event faster) than the Node version but simpler to understand IMO.</p>
+
+<h2>Conclusion</h2>
+
+<p>I am excited about Go, it has a lot to offer in multiple spaces. I will like to explore how something like Node Streams will look in Go.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Safe testing in Rails]]></title>
+    <link href="http://sporto.github.com/blog/2013/06/27/safe-testing-in-rails/"/>
+    <updated>2013-06-27T12:41:00+10:00</updated>
+    <id>http://sporto.github.com/blog/2013/06/27/safe-testing-in-rails</id>
+    <content type="html"><![CDATA[<p>There is a typical progression when developing an application. First we start with something simple, with a few models, things are simple to test. At this stage we can afford to build all the objects we need in our test without too much concern for speed and complexity.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="no">User</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="err">‘</span><span class="no">John</span><span class="err">’</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;has a name&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span><span class="p">(</span><span class="err">‘</span><span class="no">John</span><span class="err">’</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But soon things get complicated, we add more and more models to our application that depend on each other. Tests reflect this as well, we have to create a lot of objects in our tests to test simple things.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="no">User</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:english</span><span class="p">)</span> <span class="p">{</span> <span class="no">Language</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="err">‘</span><span class="no">English</span><span class="err">’</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:australia</span><span class="p">)</span> <span class="p">{</span> <span class="no">Location</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="err">‘</span><span class="no">Australia</span><span class="err">’</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="err">‘</span><span class="n">english</span><span class="err">’</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:melbourne</span><span class="p">)</span> <span class="p">{</span> <span class="no">Location</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="err">‘</span><span class="no">Melbourne</span><span class="err">’</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">australia</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:office</span><span class="p">)</span> <span class="p">{</span> <span class="no">Workspace</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="err">‘</span><span class="no">Melbourne</span> <span class="no">Office</span><span class="err">’</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="n">melbourne</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="err">‘</span><span class="no">John</span><span class="err">’</span><span class="p">,</span> <span class="n">workspace</span><span class="p">:</span> <span class="n">office</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;has a language&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">default_language</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span><span class="p">(</span><span class="n">english</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The example above creates all the objects that are needed to test <code>user.default_language</code>. We need to know a lot about our application just to run a test. Soon our test become a burden to write and very slow to run.</p>
+
+<h2>Mocks, Stubs!</h2>
+
+<p>It is evident that we are just doing too much in our test, we should just be creating the object we care about and mock the rest. Let&#8217;s rewrite this using doubles and stubs:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="no">User</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:english</span><span class="p">)</span> <span class="p">{</span> <span class="n">double</span><span class="o">.</span><span class="n">as_null_object</span><span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:office</span><span class="p">)</span> <span class="p">{</span> <span class="n">double</span><span class="o">.</span><span class="n">as_null_object</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="err">‘</span><span class="no">John</span><span class="err">’</span><span class="p">,</span> <span class="n">workspace</span><span class="p">:</span> <span class="n">office</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">before</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">office</span><span class="p">(</span><span class="ss">:language</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="ss">:english</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;has a language&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">default_language</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span><span class="p">(</span><span class="n">english</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is faster and simpler, we are just creating the object under test (user) and doubles for the other objects. We don’t need know about all the relationships in our application, just knowing the interface we care about in the objects directly related is enough. In this case just knowing that office responds to language is all we need.</p>
+
+<p>But there is of course a problem. What happens in office doesn’t respond to language anymore? Say that someone changes <code>office.language</code> to <code>office.default_language</code>. Our test will still pass! <strong>We have created an alterative universe in our test.</strong></p>
+
+<h2>Integration test</h2>
+
+<p>Many experience developers will tell us that the solution to this conodrum is to have good integration test. That is partially true, integration tests are likely to fail when the interface between the objects is changed.</p>
+
+<p>But guess what will happen? We will go and fix the integration test and then we will back to green. But wait, we forgot to fix the unit tests but everything passes! Unfortunatelly we cannot rely on due dilligence of people fixing all that should be fixed.</p>
+
+<p>Now we are even in a worst situation, our tests are all green but our app is broken. <strong>So integration tests are not a reliable solution.</strong></p>
+
+<p>Your application:</p>
+
+<p><img src="http://www.3dm3.com/portfolio/files/1/4/7/7/5/9/broken_bridge__by_kash.jpg" alt="Broken bridge" /></p>
+
+<h1>Safe mocking / stubbing</h1>
+
+<p>We still want the benefits of lean, fast tests but without the dangers of alternative realities. So what is the solution?</p>
+
+<p>I found that safe testing libraries are the best solution out there. This library will take care of checking that the methods you call actually exist in the mocked object. This frees us to still use doubles and stubs in our test without worring about the possibility of getting out of sync with the real application.</p>
+
+<p>From all the libraries I have tried, (Bogus)[https://github.com/psyho/bogus] is the most complete one. A test using Bogus will look like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="no">User</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">fake</span><span class="p">(</span><span class="ss">:english</span><span class="p">)</span> <span class="p">{</span> <span class="no">Language</span><span class="p">}</span>
+</span><span class='line'>  <span class="n">fake</span><span class="p">(</span><span class="ss">:office</span><span class="p">)</span> <span class="p">{</span> <span class="no">Workspace</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="err">‘</span><span class="no">John</span><span class="err">’</span><span class="p">,</span> <span class="n">workspace</span><span class="p">:</span> <span class="n">office</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">before</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">stub</span><span class="p">(</span><span class="ss">:office</span><span class="p">)</span><span class="o">.</span><span class="n">language</span> <span class="p">{</span> <span class="n">english</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;has a language&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">default_language</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span><span class="p">(</span><span class="n">english</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  
+</span><span class='line'> <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Bogus will check that <code>office.language</code> is an actual method and that it takes the number of parameters we send. In this way we can have the benefits of stubbing and mocking without the drawbacks. I highly recommend that you try it in your project.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Building nested recursive directives in Angular]]></title>
+    <link href="http://sporto.github.com/blog/2013/06/24/nested-recursive-directives-in-angular/"/>
+    <updated>2013-06-24T11:18:00+10:00</updated>
+    <id>http://sporto.github.com/blog/2013/06/24/nested-recursive-directives-in-angular</id>
+    <content type="html"><![CDATA[<p>I learnt a new trick over the weekend using Angular, how to build a recursive tree of objects using directives. In this post I want to share how to do it.</p>
+
+<p>Let&#8217;s say that you have some data that looks like this, it can be as deep as you want:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'>   <span class="p">[</span>
+</span><span class='line'>      <span class="p">{</span>    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Europe&#39;</span><span class="p">,</span>
+</span><span class='line'>          <span class="nx">children</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>              <span class="p">{</span>    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Italy&#39;</span><span class="p">,</span>
+</span><span class='line'>                  <span class="nx">children</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>                      <span class="p">{</span>    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Rome&#39;</span> <span class="p">},</span>
+</span><span class='line'>                      <span class="p">{</span>    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Milan&#39;</span>    <span class="p">}</span>
+</span><span class='line'>                  <span class="p">]},</span>
+</span><span class='line'>              <span class="p">{</span>    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Spain&#39;</span><span class="p">}</span>
+</span><span class='line'>          <span class="p">]</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="p">{</span>    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;South America&#39;</span><span class="p">,</span>
+</span><span class='line'>          <span class="nx">children</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>              <span class="p">{</span>    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Brasil&#39;</span>   <span class="p">},</span>
+</span><span class='line'>              <span class="p">{</span>    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Peru&#39;</span> <span class="p">}</span>
+</span><span class='line'>          <span class="p">]</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And using this data you want to build a tree, e.g.:</p>
+
+<pre><code>Europe
+    Italy
+        Rome
+        Milan
+    Spain
+South America
+    Brasil
+    Peru
+</code></pre>
+
+<p>So to build something like this you will need some kind of recursive code to loop over all the elements and their children.</p>
+
+<p>Let&#8217;s start with the html:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html</span> <span class="na">ng-app=</span><span class="s">&#39;APP&#39;</span><span class="nt">&gt;</span>
+</span><span class='line'>  ...
+</span><span class='line'>  <span class="nt">&lt;div</span> <span class="na">ng-controller=</span><span class="s">&quot;IndexCtrl&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>  ...
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>First we have a controller &#8216;IndexCtrl&#8217; which looks like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">&#39;APP&#39;</span><span class="p">,</span> <span class="p">[]);</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">controller</span><span class="p">(</span><span class="s1">&#39;IndexCtrl&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">$scope</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">locations</span> <span class="o">=</span> <span class="p">[</span> <span class="p">..</span><span class="k">this</span> <span class="nx">is</span> <span class="nx">the</span> <span class="nx">array</span> <span class="nx">of</span> <span class="nx">locations</span> <span class="nx">shown</span> <span class="nx">above</span> <span class="p">..];</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here we have <code>$scope.locations</code> pointing to the array of locations we want to render in our tree.</p>
+
+<p>Then we need a directive for rendering a collection, the html for the <strong>collection</strong> looks like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">ng-controller=</span><span class="s">&quot;IndexCtrl&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;collection</span> <span class="na">collection=</span><span class="s">&#39;locations&#39;</span><span class="nt">&gt;&lt;/collection&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This directive takes a <code>collection</code> parameter which are the locations we want to render.</p>
+
+<p>Our directive definition looks like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">directive</span><span class="p">(</span><span class="s1">&#39;collection&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">restrict</span><span class="o">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">replace</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">scope</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">collection</span><span class="o">:</span> <span class="s1">&#39;=&#39;</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">template</span><span class="o">:</span> <span class="s2">&quot;&lt;ul&gt;&lt;member ng-repeat=&#39;member in collection&#39; member=&#39;member&#39;&gt;&lt;/member&gt;&lt;/ul&gt;&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><strong>restrict: &#8216;E&#8217;</strong> tells angular that we want to apply this directive to any html tags matching <code>collection</code>.</li>
+<li><strong>replace: true</strong> tells angular that we want to replace the tag with the content of specified template in the directive.</li>
+<li><strong>scope:</strong> creates a new scope for the directive.</li>
+<li><strong>collection: &#8216;=&#8217;</strong> tells angular to use the <code>collection</code> attribute in the directive and create a variable in the directive scope with the same name, <code>=</code> means that it should be passed as an object.</li>
+<li><strong>template: &#8220;…&#8221;</strong> is the new html that will be inserted instead of the original tag.</li>
+</ul>
+
+
+<p>Notice the following code in the template:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;member</span> <span class="na">ng-repeat=</span><span class="s">&#39;member in collection&#39;</span> <span class="na">member=</span><span class="s">&#39;member&#39;</span><span class="nt">&gt;&lt;/member&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is another directive, used to render each member of the collection (we use the build-in ng-repeat for looping), in this directive we pass the current member as the <code>member</code> attribute.</p>
+
+<p>The directive for <strong>member</strong> looks like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">directive</span><span class="p">(</span><span class="s1">&#39;member&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">$compile</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">restrict</span><span class="o">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">replace</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">scope</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">member</span><span class="o">:</span> <span class="s1">&#39;=&#39;</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="nx">template</span><span class="o">:</span> <span class="s2">&quot;&lt;li&gt;&lt;/li&gt;&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">link</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="k">if</span> <span class="p">(</span><span class="nx">angular</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">member</span><span class="p">.</span><span class="nx">children</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>              <span class="nx">element</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;&lt;collection collection=&#39;member.children&#39;&gt;&lt;/collection&gt;&quot;</span><span class="p">);</span>
+</span><span class='line'>              <span class="nx">$compile</span><span class="p">(</span><span class="nx">element</span><span class="p">.</span><span class="nx">contents</span><span class="p">())(</span><span class="nx">scope</span><span class="p">)</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This looks a lot like the <strong>collection</strong> directive, except for the link function. I will explain what is happening here, but before that, let me tell you about my first approach for trying to do this.</p>
+
+<p>The first thing I tried is to simply add the <strong>collection</strong> directive inside the template:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">template</span><span class="o">:</span> <span class="s2">&quot;&lt;li&gt; &lt;collection collection=&#39;member.children&#39;&gt;&lt;/collection&gt;&lt;/li&gt;&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But this doesn&#8217;t work, it throws angular into an endless loop, because it tries to render the collection directive regardless if the member has children or not.</p>
+
+<p>So instead you need to add the <strong>collection</strong> directive manually only if there are children, thus the link function:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">link</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">//check if this member has children</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="nx">angular</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">scope</span><span class="p">.</span><span class="nx">member</span><span class="p">.</span><span class="nx">children</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>      <span class="c1">// append the collection directive to this element</span>
+</span><span class='line'>      <span class="nx">element</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;&lt;collection collection=&#39;member.children&#39;&gt;&lt;/collection&gt;&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="c1">// we need to tell angular to render the directive</span>
+</span><span class='line'>      <span class="nx">$compile</span><span class="p">(</span><span class="nx">element</span><span class="p">.</span><span class="nx">contents</span><span class="p">())(</span><span class="nx">scope</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note the line <code>$compile(element.contents())(scope);</code>. As the html is appended manually we need to tell angular to re-render the directive.</p>
+
+<p>That is it, <a href="http://jsbin.com/acibiv/3/edit">here is the complete example</a>. Thanks.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Sharing simple business logic between the client and front end with Rails]]></title>
@@ -934,7 +1432,7 @@ The keys to have great testable code are <strong>modularity</strong> (have small
 
 <p>Unfortunatelly they can get confusing, they are in my opinion one of the main reasons why new comers find JavaScript puzzling, but they are a big part of the language and we need to understand them well.</p>
 
-<h3>Functions as contructors</h3>
+<h3>Functions as constructors</h3>
 
 <p>In JavaScript you create an instance of a function like this:</p>
 
@@ -1019,7 +1517,7 @@ The keys to have great testable code are <strong>modularity</strong> (have small
 <p>As confusing as it may sound, this ‘<strong>prototype</strong>’ property is not the real prototype (<strong>__proto__</strong>) of the function.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">foo</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">===</span> <span class="nx">foo</span><span class="p">.</span><span class="nx">prototype</span> <span class="c1">//=&gt; false</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">Foo</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">===</span> <span class="nx">Foo</span><span class="p">.</span><span class="nx">prototype</span> <span class="c1">//=&gt; false</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1094,6 +1592,20 @@ The keys to have great testable code are <strong>modularity</strong> (have small
 
 
 <p>At the end of our exploration we ended up with a flat data structure so we reverted back to our established SQL solution. But I look forward to use RethinkDB again soon.</p>
+
+<p><strong>Update July 2013</strong></p>
+
+<p>Since I wrote this post some issues on RethinkDB has already been fixed. I was using rethink 1.5 at the time. Fixed issues are:</p>
+
+<ul>
+<li><p>&#8220;Queries that require boolean logic (e.g. ‘where user.id IN (1,2,3) and user.active = 1’ in SQL)&#8221; was addressed by the inclusion of array operations in RethinkDB 1.6. The equivalent ReQL command would be either of the following:</p>
+
+<pre><code>  r.table('users').filter(lambda user: r.expr([1,2,3]).contains(user['id']) &amp; (user['active'] == 1))
+  r.table('users').filter(lambda user: r.all(r.expr([1,2,3]).contains(user['id']), user['active'] == 1))
+</code></pre></li>
+<li><p>JavaScript expressions (via the r.js command) have an optional timeout flag so the user can prevent single expressions from taking down the server, since RethinkDB 1.5 (see issue #69: https://github.com/rethinkdb/rethinkdb/issues/69)</p></li>
+</ul>
+
 ]]></content>
   </entry>
   
