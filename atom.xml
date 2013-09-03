@@ -4,7 +4,7 @@
   <title><![CDATA[Sebastian's Blog]]></title>
   <link href="http://sporto.github.com/atom.xml" rel="self"/>
   <link href="http://sporto.github.com/"/>
-  <updated>2013-08-30T21:27:22+10:00</updated>
+  <updated>2013-09-03T12:44:56+10:00</updated>
   <id>http://sporto.github.com/</id>
   <author>
     <name><![CDATA[Sebastian Porto]]></name>
@@ -90,7 +90,7 @@
 
 <h2>The Go Client</h2>
 
-<p>The complete client in <a href="[https://gist.github.com/sporto/6258909#file-client-go">Go is here</a>.</p>
+<p>The complete client in <a href="https://gist.github.com/sporto/6258909#file-client-go">Go is here</a>.</p>
 
 <p>The key lines of code are below:</p>
 
