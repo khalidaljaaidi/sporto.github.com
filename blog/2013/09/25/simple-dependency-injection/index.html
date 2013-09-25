@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>AMD, is not one or the other - Sebastian's Blog</title>
+  <title>Simple Dependency Injection - Sebastian's Blog</title>
   <meta name="author" content="Sebastian Porto">
 
   
-  <meta name="description" content="I am starting to see a pattern in many JS libraries where they are trying to detect the presence of AMD an act accordingly. I think it is great that &hellip;">
+  <meta name="description" content="Some time ago I read the book Practical Object-Oriented Design in Ruby by Sandi Metz, while an excellent book there is one thing that bothered me &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://sporto.github.com/blog/2012/12/05/amd/">
+  <link rel="canonical" href="http://sporto.github.com/blog/2013/09/25/simple-dependency-injection/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -80,7 +80,7 @@
   
   <header>
     
-      <h1 class="entry-title">AMD, Is Not One or the Other</h1>
+      <h1 class="entry-title">Simple Dependency Injection</h1>
     
     
       <p class="meta">
@@ -96,35 +96,55 @@
   
 
 
-<time datetime="2012-12-05T12:43:00+11:00" pubdate data-updated="true">Dec 5<span>th</span>, 2012</time>
+<time datetime="2013-09-25T21:12:00+10:00" pubdate data-updated="true">Sep 25<span>th</span>, 2013</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>I am starting to see a pattern in many JS libraries where they are trying to detect the presence of AMD an act accordingly. I think it is great that AMD is getting so much attention but they usual way this is done has a big issue: <strong>It shouldn’t be one or the other.</strong></p>
+<div class="entry-content"><p>Some time ago I read the book <a href="http://www.amazon.com/Practical-Object-Oriented-Design-Ruby-Addison-Wesley/dp/0321721330">Practical Object-Oriented Design in Ruby</a> by Sandi Metz, while an excellent book there is one thing that bothered me while reading it.</p>
 
-<p>The pattern usually goes like this:</p>
+<p>That is the pattern for dependecy injection proposed on the book. It goes something like this:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'>   <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span> <span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="err">…</span> <span class="nx">define</span> <span class="nx">as</span> <span class="nx">AMD</span> <span class="nx">module</span>
-</span><span class='line'>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>      <span class="err">…</span> <span class="nx">attach</span> <span class="nx">as</span> <span class="nx">global</span>
-</span><span class='line'>  <span class="p">}</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="k">class</span> <span class="nc">Car</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@engine</span> <span class="o">=</span> <span class="n">engine</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">start</span>
+</span><span class='line'>      <span class="n">engine</span><span class="o">.</span><span class="n">start</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">car</span> <span class="o">=</span> <span class="no">Car</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Problem with this is that if the script is loaded using a common script tag and a AMD loaded (e.g. require) is also present, then it won’t be possible to use the library in the normal way (using the global variable).</p>
+<p>In this example the class Car takes an <code>engine</code> dependecy, each time you want to create a car you have to pass an engine to it. This can easily become a cumbersome way of instantiating objects because you need to know a lot about your object just to create them. In this case I need to know that Car takes an engine and specifically which engine depending on the type of car I want to create.</p>
 
-<p>You might think that if require is there we should load everything using it, but we have good reasons not to do this. We concatentate and minifiy the most important parts of our JS code, the rest is loaded using require on demand.</p>
+<p>To deal with this the suggested solution is to use an <strong>injector</strong>. See the definition in <a href="http://en.wikipedia.org/wiki/Dependency_injection">wikipedia</a>. The injector is in charge of creating the instances you need and injecting the right dependecies.</p>
 
-<p>So the better way to do this is by attaching the library in many ways as possible:</p>
+<p>Although this is a powerful pattern I believe it mostly an unnecessary complication, specially in dynamic languages like ruby. Let me explain why.</p>
+
+<h2>What do we want to achieve with DI?</h2>
+
+<p>The main reason for using DI is to be able to swap the dependencies of an object at run time, this is mostly useful for testing. To achieve this there is a dead simple way to do it without having to deal with the complexity of injectors.</p>
+
+<h2>The simple way to do it</h2>
+
+<p>Instead of passing the dependecy when instantiating an object, we can simply let the object have default dependecies.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -140,32 +160,42 @@
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'>   <span class="c1">// CommonJS module is defined</span>
-</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">exports</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">module</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">foo</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="k">class</span> <span class="nc">Car</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="nx">exports</span><span class="p">.</span><span class="nx">foo</span> <span class="o">=</span> <span class="nx">foo</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>    <span class="kp">attr_writer</span> <span class="ss">:engine</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="c1">// Register as a named module with AMD.</span>
-</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">define</span><span class="p">(</span><span class="err">‘</span><span class="nx">foo</span><span class="err">’</span><span class="p">,</span> <span class="p">[],</span> <span class="kd">function</span><span class="p">(){</span> <span class="k">return</span> <span class="nx">foo</span><span class="p">;</span> <span class="p">});</span>
-</span><span class='line'><span class="p">}</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">start</span>
+</span><span class='line'>      <span class="n">engine</span><span class="o">.</span><span class="n">start</span>
+</span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="c1">// Integrate with $ if defined</span>
-</span><span class='line'>  <span class="c1">// or create our own underscore object.</span>
-</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">foo</span> <span class="o">=</span> <span class="nx">foo</span>
-</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">engine</span>
+</span><span class='line'>      <span class="vi">@engine</span> <span class="o">||=</span> <span class="no">Engine</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">car</span> <span class="o">=</span> <span class="no">Car</span><span class="o">.</span><span class="n">new</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<p>If we just create a car we get a default engine for it, so we don&#8217;t need to bother with injectors.</p>
+
+<p>What do we gain:</p>
+
+<ul>
+<li>External code doesn&#8217;t need to know about the internals of our objects</li>
+<li>We have sane default dependecies</li>
+<li>We can easily swap the dependecies at run time</li>
+</ul>
+
+
+<p>In your test you can simply do this:</p>
+
+<p>  car = Car.new
+  car.engine = FakeEngine</p>
+
+<p>  car.start</p>
+
+<p>So that&#8217;s it, <strong>DI doesn&#8217;t have to be complicated at all in ruby</strong>.</p>
 </div>
 
 
@@ -188,7 +218,7 @@
   
 
 
-<time datetime="2012-12-05T12:43:00+11:00" pubdate data-updated="true">Dec 5<span>th</span>, 2012</time>
+<time datetime="2013-09-25T21:12:00+10:00" pubdate data-updated="true">Sep 25<span>th</span>, 2013</time>
       
 
 
@@ -196,7 +226,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://sporto.github.com/blog/2012/12/05/amd/" data-via="sebasporto" data-counturl="http://sporto.github.com/blog/2012/12/05/amd/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://sporto.github.com/blog/2013/09/25/simple-dependency-injection/" data-via="sebasporto" data-counturl="http://sporto.github.com/blog/2013/09/25/simple-dependency-injection/" >Tweet</a>
   
   
   
@@ -205,10 +235,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2012/11/15/a-pattern-for-service-objects-in-rails/" title="Previous Post: A Pattern for Service Objects in Rails">&laquo; A Pattern for Service Objects in Rails</a>
+        <a class="basic-alignment left" href="/blog/2013/08/18/concurrency-node-vs-go/" title="Previous Post: Comparing Concurrency in Node and Go">&laquo; Comparing Concurrency in Node and Go</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2012/12/09/callbacks-listeners-promises/" title="Next Post: Asynchronous JS: Callbacks, Listeners, Control Flow Libs and Promises">Asynchronous JS: Callbacks, Listeners, Control Flow Libs and Promises &raquo;</a>
       
     </p>
   </footer>
@@ -298,8 +326,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://sporto.github.com/blog/2012/12/05/amd/';
-        var disqus_url = 'http://sporto.github.com/blog/2012/12/05/amd/';
+        var disqus_identifier = 'http://sporto.github.com/blog/2013/09/25/simple-dependency-injection/';
+        var disqus_url = 'http://sporto.github.com/blog/2013/09/25/simple-dependency-injection/';
         var disqus_script = 'embed.js';
       
     (function () {
