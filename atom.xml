@@ -4,7 +4,7 @@
   <title><![CDATA[Sebastian's Blog]]></title>
   <link href="http://sporto.github.com/atom.xml" rel="self"/>
   <link href="http://sporto.github.com/"/>
-  <updated>2013-09-25T21:46:29+10:00</updated>
+  <updated>2013-09-25T21:47:57+10:00</updated>
   <id>http://sporto.github.com/</id>
   <author>
     <name><![CDATA[Sebastian Porto]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Simple Dependency Injection]]></title>
+    <title type="html"><![CDATA[Simple Dependency Injection in Ruby]]></title>
     <link href="http://sporto.github.com/blog/2013/09/25/simple-dependency-injection/"/>
     <updated>2013-09-25T21:12:00+10:00</updated>
     <id>http://sporto.github.com/blog/2013/09/25/simple-dependency-injection</id>
@@ -105,10 +105,16 @@
 
 <p>In your test you can simply do this:</p>
 
-<p>  car = Car.new
-  car.engine = FakeEngine</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">car</span> <span class="o">=</span> <span class="no">Car</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="n">car</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="no">FakeEngine</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">car</span><span class="o">.</span><span class="n">start</span>
+</span></code></pre></td></tr></table></div></figure>
 
-<p>  car.start</p>
 
 <p>So that&#8217;s it, <strong>DI doesn&#8217;t have to be complicated at all in ruby</strong>.</p>
 ]]></content>
